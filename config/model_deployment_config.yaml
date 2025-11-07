@@ -1,0 +1,138 @@
+# Oil & Gas Geospatial Models Deployment Configuration
+
+project:
+  name: "Oil-and-Gas-Demo"
+  version: "1.0.0"
+  description: "Geospatial ML models for oil and gas facility operations"
+
+models:
+  equipment_health:
+    name: "oil_gas_equipment_health_model"
+    version: "v1"
+    type: "regression"
+    target: "equipment_health_score"
+    description: "Predicts equipment health score (0-1) based on operational and environmental factors"
+    
+  production_efficiency:
+    name: "oil_gas_production_efficiency_model" 
+    version: "v1"
+    type: "classification"
+    target: "production_efficiency_class"
+    classes: ["Low", "Medium", "High"]
+    description: "Classifies production efficiency level based on utilization and operational metrics"
+    
+  environmental_risk:
+    name: "oil_gas_environmental_risk_model"
+    version: "v1" 
+    type: "classification"
+    target: "environmental_risk_class"
+    classes: ["Low", "Medium", "High"]
+    description: "Assesses environmental risk level based on emissions and safety indicators"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  title: "Oil & Gas Geospatial Models API"
+  description: "REST API for oil and gas facility predictions"
+  version: "1.0.0"
+  
+  endpoints:
+    - path: "/predict"
+      method: "POST"
+      description: "Predict all metrics for a single facility"
+    - path: "/predict/batch" 
+      method: "POST"
+      description: "Predict metrics for multiple facilities"
+    - path: "/predict/equipment-health"
+      method: "POST"
+      description: "Predict only equipment health score"
+    - path: "/predict/production-efficiency"
+      method: "POST"
+      description: "Predict only production efficiency class"
+    - path: "/predict/environmental-risk"
+      method: "POST"
+      description: "Predict only environmental risk class"
+
+features:
+  numeric:
+    - latitude
+    - longitude
+    - oil_production_bpd
+    - gas_production_mcfd
+    - well_depth_ft
+    - well_age_years
+    - vibration_level_mm_s
+    - temperature_celsius
+    - pressure_psi
+    - h2s_concentration_ppm
+    - co2_concentration_ppm
+    - noise_level_db
+    - capacity_bpd
+    - current_throughput_bpd
+    - utilization_rate
+    - days_since_maintenance
+    
+  categorical:
+    - facility_type
+    - region
+    - status
+    
+  engineered:
+    - production_ratio
+    - environmental_stress
+    - age_depth_interaction
+    - maintenance_overdue
+    - latitude_bin
+    - longitude_bin
+
+monitoring:
+  performance_metrics:
+    equipment_health: ["r2_score", "rmse", "mae"]
+    production_efficiency: ["accuracy", "precision", "recall", "f1"]
+    environmental_risk: ["accuracy", "precision", "recall", "f1"]
+    
+  data_quality:
+    - missing_values_check
+    - range_validation
+    - type_validation
+    - feature_drift_detection
+    
+  alerts:
+    - low_model_performance
+    - data_drift_detected
+    - high_prediction_latency
+    - api_errors
+
+deployment:
+  environment: "production"
+  compute_tier: "small"  # Domino compute environment
+  auto_scaling: true
+  health_check_interval: 30
+  max_response_time: 5000  # milliseconds
+  
+  domino:
+    model_api: true
+    app_deployment: true
+    scheduled_retraining: "monthly"
+    
+governance:
+  model_risk_level: "medium"
+  validation_status: "approved"
+  approval_groups:
+    - "modeling-practitioners"
+    - "it-review"
+    - "lob-review"
+  compliance_frameworks:
+    - "Model Risk Management V3"
+    - "Ethical AI Framework"
+    
+documentation:
+  model_cards: "/mnt/artifacts/reports/model_evaluation_report.json"
+  notebooks: "/mnt/code/notebooks/oil_gas_model_analysis.ipynb"
+  api_docs: "Auto-generated via FastAPI"
+  
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "/mnt/artifacts/logs/model_api.log"
+  retention_days: 30

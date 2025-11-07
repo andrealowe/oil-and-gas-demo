@@ -207,3 +207,10 @@ Thumbs.db
 
 checkpoints/
 *.ckpt
+
+# Claude Code files
+.claude/
+CLAUDE.md
+
+# Development notes
+.development_notes.md
