@@ -542,7 +542,7 @@ def create_production_forecast_chart(production_df, forecast_data=None):
             fillcolor='rgba(59,130,246,0.2)'
         ))
     
-    # Update layout
+    # Update layout with zoom and interactive features
     fig.update_layout(
         title='Production Forecasting Analysis',
         xaxis_title='Date',
@@ -563,7 +563,24 @@ def create_production_forecast_chart(production_df, forecast_data=None):
             y=1.02,
             xanchor="right",
             x=1
-        )
+        ),
+        # Enable zoom and pan
+        dragmode='zoom',
+        selectdirection='d'
+    )
+    
+    # Update axes for better zoom experience
+    fig.update_xaxes(
+        showspikes=True,
+        spikecolor="gray",
+        spikesnap="cursor",
+        spikemode="across"
+    )
+    fig.update_yaxes(
+        showspikes=True,
+        spikecolor="gray",
+        spikesnap="cursor",
+        spikemode="across"
     )
     
     return fig
@@ -636,7 +653,24 @@ def create_price_forecast_chart(price_df, price_forecast_data=None):
         hovermode='x unified',
         height=500,
         font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#1f2937')
+        title_font=dict(size=16, color='#1f2937'),
+        # Enable zoom and pan
+        dragmode='zoom',
+        selectdirection='d'
+    )
+    
+    # Update axes for better zoom experience
+    fig.update_xaxes(
+        showspikes=True,
+        spikecolor="gray",
+        spikesnap="cursor",
+        spikemode="across"
+    )
+    fig.update_yaxes(
+        showspikes=True,
+        spikecolor="gray",
+        spikesnap="cursor",
+        spikemode="across"
     )
     
     return fig
@@ -696,9 +730,30 @@ def create_demand_forecast_chart(demand_df, demand_forecast_data=None):
         ))
     
     fig.update_layout(
+        title='Regional Demand Forecasting',
+        xaxis_title='Date',
+        yaxis_title='Demand (Thousand BPD)',
         height=500,
         font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#1f2937')
+        title_font=dict(size=16, color='#1f2937'),
+        hovermode='x unified',
+        # Enable zoom and pan
+        dragmode='zoom',
+        selectdirection='d'
+    )
+    
+    # Update axes for better zoom experience
+    fig.update_xaxes(
+        showspikes=True,
+        spikecolor="gray",
+        spikesnap="cursor",
+        spikemode="across"
+    )
+    fig.update_yaxes(
+        showspikes=True,
+        spikecolor="gray",
+        spikesnap="cursor",
+        spikemode="across"
     )
     
     return fig
@@ -817,8 +872,30 @@ def create_maintenance_optimization_chart(maintenance_df):
         showlegend=False,
         title_text="Maintenance Scheduling Optimization",
         title_x=0.5,
-        title_font=dict(size=16, color='#1f2937')
+        title_font=dict(size=16, color='#1f2937'),
+        # Enable zoom and pan
+        dragmode='zoom',
+        selectdirection='d'
     )
+    
+    # Update all subplots for better zoom experience
+    for i in range(1, 5):  # 4 subplots
+        fig.update_xaxes(
+            showspikes=True,
+            spikecolor="gray",
+            spikesnap="cursor",
+            spikemode="across",
+            row=(i-1)//2+1,
+            col=(i-1)%2+1
+        )
+        fig.update_yaxes(
+            showspikes=True,
+            spikecolor="gray",
+            spikesnap="cursor",
+            spikemode="across",
+            row=(i-1)//2+1,
+            col=(i-1)%2+1
+        )
     
     return fig
 
@@ -1005,7 +1082,12 @@ def main():
         production_forecast = forecast_results.get('oil_production_bpd')
         production_chart = create_production_forecast_chart(production_df, production_forecast)
         
-        st.plotly_chart(production_chart, use_container_width=True)
+        st.plotly_chart(production_chart, use_container_width=True, config={
+            'displayModeBar': True,
+            'displaylogo': False,
+            'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
+            'modeBarButtonsToRemove': ['select2d', 'lasso2d']
+        })
         
         # Production insights
         if not production_df.empty:
@@ -1053,7 +1135,12 @@ def main():
         price_forecast = forecast_results.get('crude_oil_price_usd_bbl')
         price_chart = create_price_forecast_chart(price_df, price_forecast)
         
-        st.plotly_chart(price_chart, use_container_width=True)
+        st.plotly_chart(price_chart, use_container_width=True, config={
+            'displayModeBar': True,
+            'displaylogo': False,
+            'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
+            'modeBarButtonsToRemove': ['select2d', 'lasso2d']
+        })
         
         # Price analysis
         if price_forecast:
@@ -1129,7 +1216,12 @@ def main():
         demand_forecast = forecast_results.get('gasoline_demand_thousand_bpd')
         demand_chart = create_demand_forecast_chart(demand_df, demand_forecast)
         
-        st.plotly_chart(demand_chart, use_container_width=True)
+        st.plotly_chart(demand_chart, use_container_width=True, config={
+            'displayModeBar': True,
+            'displaylogo': False,
+            'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
+            'modeBarButtonsToRemove': ['select2d', 'lasso2d']
+        })
         
         # Demand analysis
         st.markdown('<div class="tab-section-header"><h3>Demand Analysis by Product</h3></div>', unsafe_allow_html=True)
@@ -1165,7 +1257,12 @@ def main():
         # Maintenance optimization chart
         maintenance_chart = create_maintenance_optimization_chart(maintenance_df)
         
-        st.plotly_chart(maintenance_chart, use_container_width=True)
+        st.plotly_chart(maintenance_chart, use_container_width=True, config={
+            'displayModeBar': True,
+            'displaylogo': False,
+            'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
+            'modeBarButtonsToRemove': ['select2d', 'lasso2d']
+        })
         
         # Maintenance recommendations
         st.markdown('<div class="tab-section-header"><h3>Maintenance Recommendations</h3></div>', unsafe_allow_html=True)

@@ -1,10 +1,10 @@
 # Oil & Gas Analytics Platform
 
-A comprehensive analytics platform for oil and gas operations, providing advanced geospatial visualization, forecasting capabilities, and operational intelligence through integrated dashboards and machine learning models.
+A comprehensive analytics Domino demo for oil and gas operations, providing advanced geospatial visualization, forecasting capabilities, and operational intelligence through integrated dashboards and machine learning models.
 
 ## Overview
 
-This platform delivers enterprise-grade analytics solutions for petroleum industry operations, combining real-time facility monitoring, production forecasting, and equipment health management. The system provides actionable insights for operational optimization, asset management, and strategic planning.
+This platform delivers enterprise-grade analytics solutions for petroleum industry operations, combining real-time facility monitoring, production forecasting, and equipment health management. The system provides actionable insights for operational optimization, asset management, and strategic planning. **Note** This project is for demo purposes and contains synthetic data. 
 
 ## Platform Components
 
@@ -23,7 +23,7 @@ This platform delivers enterprise-grade analytics solutions for petroleum indust
 - **Scenario Planning**: What-if analysis for strategic decision making
 
 ### Machine Learning Infrastructure
-- **Model Registry**: MLflow-based model versioning and lifecycle management
+- **Model Registry**: Domino model versioning and lifecycle management
 - **API Endpoints**: RESTful APIs for real-time predictions and data integration
 - **Automated Training**: Scheduled model retraining with performance monitoring
 - **Data Pipelines**: Automated data processing and feature engineering
@@ -32,15 +32,8 @@ This platform delivers enterprise-grade analytics solutions for petroleum indust
 
 ### Data Management
 - **Storage**: Domino Datasets for large-scale data management
-- **Processing**: Pandas and NumPy for high-performance data operations
 - **Quality**: Automated data validation and quality assurance
 - **Security**: Enterprise-grade data protection and access controls
-
-### Analytics Engine
-- **Visualization**: Plotly-based interactive charts and maps
-- **Modeling**: scikit-learn, XGBoost for predictive analytics
-- **Experiment Tracking**: MLflow for model development lifecycle
-- **Performance Monitoring**: Real-time model performance tracking
 
 ### Deployment Platform
 - **Domino Data Lab**: Enterprise MLOps platform for model deployment
@@ -106,27 +99,6 @@ This platform delivers enterprise-grade analytics solutions for petroleum indust
 - **Investment Planning**: ROI analysis for capital expenditures
 - **Risk Management**: Operational and market risk assessment
 
-## Deployment Instructions
-
-### Geospatial Dashboard
-```bash
-streamlit run scripts/geospatial_dashboard.py --server.port 8501
-```
-
-### Forecasting Dashboard
-```bash
-streamlit run scripts/forecasting_dashboard.py --server.port 8502
-```
-
-### API Services
-```bash
-# Geospatial predictions
-python src/api/domino_geospatial_endpoint.py
-
-# Forecasting predictions  
-python src/api/domino_forecasting_endpoint.py
-```
-
 ## Quality Assurance
 
 ### Testing Framework
@@ -134,11 +106,6 @@ python src/api/domino_forecasting_endpoint.py
 - **Integration Testing**: End-to-end system validation
 - **Performance Testing**: Scalability and response time validation
 - **Data Quality**: Automated data validation and monitoring
-
-### Validation Process
-```bash
-python test_dashboard.py
-```
 
 ## Security and Compliance
 
@@ -153,34 +120,6 @@ python test_dashboard.py
 - **Safety Regulations**: Health and safety monitoring systems
 - **Industry Standards**: API and ISO compliance frameworks
 - **Data Governance**: Enterprise data management policies
-
-## Performance Optimization
-
-### System Performance
-- **Caching**: Intelligent data caching for improved response times
-- **Load Balancing**: Distributed processing for high availability
-- **Monitoring**: Real-time performance metrics and alerting
-- **Scalability**: Auto-scaling based on demand patterns
-
-### Model Performance
-- **Accuracy Tracking**: Continuous model performance monitoring
-- **Drift Detection**: Automated detection of model degradation
-- **Retraining**: Scheduled model updates with new data
-- **A/B Testing**: Model comparison and validation
-
-## Support and Maintenance
-
-### Technical Support
-- **Documentation**: Comprehensive user guides and technical specifications
-- **Training**: User training programs and certification
-- **Helpdesk**: Technical support and issue resolution
-- **Updates**: Regular system updates and feature enhancements
-
-### System Maintenance
-- **Monitoring**: 24/7 system monitoring and alerting
-- **Backup**: Automated data backup and disaster recovery
-- **Security**: Regular security assessments and updates
-- **Performance**: Continuous optimization and tuning
 
 ---
 
