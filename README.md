@@ -17,7 +17,7 @@ This platform delivers enterprise-grade analytics solutions for petroleum indust
 
 ### Forecasting Analytics Dashboard
 - **Production Forecasting**: Advanced time series modeling for oil and gas production planning
-- **Price Analytics**: Market price prediction and trend analysis
+- **Price Analytics**: Market price prediction and trend analysis. The models combine gradient boosting (LightGBM) with classical time series techniques (ARIMA, seasonal decomposition) for robust forecasting performance.
 - **Demand Forecasting**: Energy demand modeling for strategic planning
 - **Operational Intelligence**: Key performance indicators and efficiency metrics
 - **Scenario Planning**: What-if analysis for strategic decision making
