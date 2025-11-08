@@ -1,12 +1,21 @@
 """
-Oil and Gas Synthetic Data Generator
+Oil and Gas Data Quality Checker for Domino Flows
 
-This script generates comprehensive synthetic datasets for oil and gas company dashboards:
-1. Geospatial dataset: Wells, refineries, facilities with production and health metrics
-2. Time series dataset: Production trends, forecasting, prices, and maintenance schedules
+This script checks the availability and quality of required data files for the
+oil and gas forecasting pipeline. It is designed to work with read-only
+Domino Datasets where data is pre-loaded.
 
-Usage:
+The script verifies that all required parquet files are present and accessible
+before allowing the forecasting workflow to proceed.
+
+Usage in Domino Flows:
     python scripts/oil_gas_data_generator.py
+
+Required data files:
+- production_timeseries.parquet
+- prices_timeseries.parquet  
+- demand_timeseries.parquet
+- maintenance_timeseries.parquet
 """
 
 import pandas as pd
@@ -817,93 +826,10 @@ def check_data_availability_for_flow():
         raise
 
 def main():
-    """Main function to generate oil and gas synthetic datasets"""
-    import argparse
-
-    # Parse arguments
-    parser = argparse.ArgumentParser(description='Oil & Gas Data Generator')
-    parser.add_argument('--check-only', action='store_true',
-                       help='Only check data availability (for Domino Flows - read-only mode)')
-    args = parser.parse_args()
-
-    # If check-only mode, just verify data exists
-    if args.check_only:
-        return check_data_availability_for_flow()
-
-    # Otherwise, run full data generation
-    try:
-        # Initialize generator
-        generator = OilGasDataGenerator("Oil-and-Gas-Demo")
-
-        print("🛢️  Oil & Gas Synthetic Data Generator")
-        print("=" * 50)
-        print(f"Project: {generator.project_name}")
-        print(f"Data directory: {generator.directories['data']}")
-        print(f"Artifacts directory: {generator.directories['artifacts']}")
-        print()
-
-        # Generate geospatial data
-        print("📍 Generating geospatial facilities data...")
-        geospatial_df = generator.generate_geospatial_data(
-            n_wells=1500,
-            n_refineries=25,
-            n_facilities=200
-        )
-        print(f"   Generated {len(geospatial_df)} facilities across {geospatial_df['region'].nunique()} regions")
-
-        # Generate time series data
-        print("📈 Generating time series datasets...")
-        time_series_data = generator.generate_time_series_data(
-            geospatial_df,
-            start_date='2022-01-01',
-            end_date='2024-12-31'
-        )
-
-        for dataset_name, df in time_series_data.items():
-            print(f"   {dataset_name}: {len(df):,} records")
-
-        # Validate data quality
-        print("✅ Validating data quality...")
-        all_data = {'geospatial': geospatial_df, **time_series_data}
-        quality_scores = generator.validate_data_quality(all_data)
-
-        for dataset_name, score in quality_scores.items():
-            print(f"   {dataset_name}: {score:.3f}")
-
-        overall_quality = np.mean(list(quality_scores.values()))
-        print(f"   Overall quality score: {overall_quality:.3f}")
-
-        # Save datasets
-        print("💾 Saving datasets...")
-        saved_paths = generator.save_datasets(geospatial_df, time_series_data)
-
-        print("📁 Files saved:")
-        for dataset_name, path in saved_paths.items():
-            print(f"   {dataset_name}: {path}")
-
-        print()
-        print("✨ Oil & Gas synthetic data generation completed successfully!")
-        print(f"📊 MLflow experiment: oil_gas_data_generation_{generator.project_name}")
-        print(f"🌐 MLflow UI: http://localhost:8768")
-
-        return saved_paths
-
-    except Exception as e:
-        print(f"❌ Error in data generation: {e}")
-        # CRITICAL: Write error output for Flow execution
-        # This ensures sidecar uploader has a file even if script fails
-        workflow_output = Path("/workflow/outputs/data_summary")
-        if workflow_output.parent.exists():
-            error_data = {
-                'timestamp': datetime.now().isoformat(),
-                'framework': 'data_generation',
-                'status': 'error',
-                'error_message': str(e),
-                'error_type': type(e).__name__
-            }
-            workflow_output.write_text(json.dumps(error_data))
-            print(f"✓ Wrote error output to {workflow_output}")
-        raise
+    """Main function to check oil and gas data availability for Domino Flows"""
+    # Only check data availability - do not generate
+    # This function is designed for read-only Domino Dataset scenarios
+    return check_data_availability_for_flow()
 
 if __name__ == "__main__":
     saved_paths = main()
