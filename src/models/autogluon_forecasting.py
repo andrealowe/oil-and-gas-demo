@@ -471,7 +471,7 @@ def main(args=None):
                 'timestamp': datetime.now().isoformat(),
                 'framework': 'autogluon',
                 'status': 'success',
-                'total_configs': len(all_configs),
+                'total_configs': len(test_configs),
                 'successful_configs': len([r for r in all_results.values() if r is not None]),
                 'best_config': best_config,
                 'best_mae': best_score if best_score != float('inf') else None,
