@@ -2,14 +2,16 @@
 Data Configuration Utility for Domino Data Lab Projects
 
 This utility determines correct storage paths based on project type:
-- Git-based projects (DOMINO_WORKING_DIR=/mnt/code)
-- DFS projects (DOMINO_WORKING_DIR=/mnt)
+- Git-based projects (DOMINO_WORKING_DIR=/mnt/code): Uses /mnt/data/{project_name}
+- DFS projects (DOMINO_WORKING_DIR=/mnt): Uses /domino/datasets/local/{project_name}
+
+All data and artifacts are stored in the same data directory for consistency.
 
 Usage:
     from scripts.data_config import get_data_paths
-    paths = get_data_paths('my_project')
-    data_dir = paths['base_data_path']
-    artifacts_dir = paths['artifacts_path']
+    paths = get_data_paths('Oil-and-Gas-Demo')
+    data_dir = paths['base_data_path']        # /mnt/data/Oil-and-Gas-Demo
+    artifacts_dir = paths['artifacts_path']   # /mnt/data/Oil-and-Gas-Demo
 """
 
 import os
@@ -35,15 +37,14 @@ def get_data_paths(project_name: str) -> Dict[str, Union[Path, bool]]:
     
     if is_git_based:
         # Git-based project
-        # Data is ALWAYS stored in /mnt/data/{project_name}
-        # Artifacts (models, reports, etc.) go to /mnt/artifacts
+        # Data AND artifacts are stored in /mnt/data/{project_name}
         datasets_dir = os.environ.get('DOMINO_DATASETS_DIR', '/mnt/data')
         base_data_path = Path(datasets_dir) / project_name
-        artifacts_path = Path('/mnt/artifacts')
+        artifacts_path = Path(datasets_dir) / project_name  # Changed to use data directory
     else:
         # DFS project
         base_data_path = Path(f'/domino/datasets/local/{project_name}')
-        artifacts_path = Path('/mnt')
+        artifacts_path = Path(f'/domino/datasets/local/{project_name}')  # Changed to use data directory
     
     return {
         'base_data_path': base_data_path,

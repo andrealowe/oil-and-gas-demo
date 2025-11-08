@@ -36,8 +36,8 @@ src/models/oil_gas_forecasting.py
 src/models/model_comparison.py
 src/models/forecasting_config.py
 
-# Exclude data and artifacts
-data/
+# Exclude data and artifacts (using /mnt/data/Oil-and-Gas-Demo now)
+/mnt/data/
 *.parquet
 *.csv
 *.pkl

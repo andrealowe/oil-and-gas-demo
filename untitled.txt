@@ -1,0 +1,59 @@
+echo -e "import os\nprint('https://se-demo.domino.tech/{}/{}/notebookSession/{}/proxy/8501/'.format(os.environ['DOMINO_PROJECT_OWNER'], os.environ['DOMINO_PROJECT_NAME'], os.environ['DOMINO_RUN_ID']))" | python3
+
+📈 Price Prediction API
+
+  Location: /mnt/code/src/api/price_prediction_api.py
+
+  Function: predict_prices(input_data)
+
+  Features:
+  - Forecasts crude oil and natural gas prices
+  - Includes market indicators (supply disruption, demand surge, economic factors)
+  - Mock volatility and seasonal patterns
+  - Confidence intervals and risk assessment
+  - Units: USD/barrel (oil) or USD/MMBtu (gas)
+
+  Input Example:
+  {
+      'forecast_days': 30,
+      'start_date': '2024-11-09',
+      'commodity': 'crude_oil',
+      'market_indicators': {
+          'supply_disruption': True,
+          'demand_surge': False
+      }
+  }
+
+  📊 Demand Forecast API
+
+  Location: /mnt/code/src/api/demand_forecast_api.py
+
+  Function: predict_demand(input_data)
+
+  Features:
+  - Forecasts demand for crude oil, natural gas, and refined products
+  - Regional forecasting (North America, Europe, Asia Pacific, Global)
+  - Economic factors integration (GDP growth, industrial activity)
+  - Seasonal and weekly patterns
+  - Units: mb/day (million barrels/day) or bcf/day (billion cubic feet/day)
+
+  Input Example:
+  {
+      'forecast_days': 30,
+      'start_date': '2024-12-01',
+      'region': 'north_america',
+      'commodity': 'natural_gas',
+      'economic_factors': {
+          'gdp_growth_rate': 0.028,
+          'industrial_activity_index': 1.05
+      }
+  }
+
+  🔧 Key Features of Both APIs:
+
+  - Mock prediction logic with realistic patterns
+  - Comprehensive input validation
+  - Detailed output with confidence intervals
+  - Summary statistics and metadata
+  - Error handling and logging
+  - Seasonal, economic, and market factor modeling

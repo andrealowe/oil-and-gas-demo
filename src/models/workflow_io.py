@@ -198,7 +198,7 @@ class WorkflowIO:
         logger.error(f"Writing error output for '{name}': {error}")
         self.write_output(name, error_data)
 
-    def get_model_save_path(self, base_path: str = "/mnt/artifacts") -> Path:
+    def get_model_save_path(self, base_path: str = "/mnt/data/Oil-and-Gas-Demo") -> Path:
         """
         Get appropriate model save path based on execution mode
         
@@ -231,7 +231,7 @@ class WorkflowIO:
             return self.WORKFLOW_OUTPUTS_DIR / artifact_type
         else:
             # Normal execution - use artifacts directory
-            return Path(f"/mnt/artifacts/{artifact_type}")
+            return Path(f"/mnt/data/Oil-and-Gas-Demo/{artifact_type}")
 
     def ensure_model_directory(self, subdirectory: str = "models") -> Path:
         """
