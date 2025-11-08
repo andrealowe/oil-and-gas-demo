@@ -801,19 +801,28 @@ def write_training_summary(result):
 
 def main():
     """Main execution function"""
-    # Ensure data exists (will generate if missing)
-    print("Checking data availability...")
-    ensure_data_exists('Oil-and-Gas-Demo')
-    print("Data check complete")
+    try:
+        # Ensure data exists (will generate if missing)
+        print("Checking data availability...")
+        ensure_data_exists('Oil-and-Gas-Demo')
+        print("Data check complete")
 
-    forecaster = OilGasTimeSeriesForecaster()
-    result = forecaster.run_complete_forecasting_pipeline()
+        forecaster = OilGasTimeSeriesForecaster()
+        result = forecaster.run_complete_forecasting_pipeline()
 
-    # Write training summary
-    summary = write_training_summary(result)
+        # Write training summary
+        summary = write_training_summary(result)
 
-    print("Pipeline Result:")
-    print(json.dumps(result, indent=2, default=str))
+        print("Pipeline Result:")
+        print(json.dumps(result, indent=2, default=str))
+
+    except Exception as e:
+        logger.error(f"Error in main execution: {e}")
+        # CRITICAL: Write error output for Flow execution
+        # This ensures sidecar uploader has a file even if script fails
+        wf_io = WorkflowIO()
+        wf_io.write_error_output("training_summary", e, "combined_lightgbm_arima")
+        raise
 
 if __name__ == "__main__":
     main()

@@ -625,19 +625,10 @@ def main(args=None):
         
     except Exception as e:
         logger.error(f"Error in main execution: {e}")
-        # Write error summary for Flow execution
-        if args and args.training_summary:
-            error_summary = {
-                'timestamp': datetime.now().isoformat(),
-                'framework': 'nixtla_neuralforecast',
-                'status': 'error',
-                'error_message': str(e),
-                'total_configs': 0,
-                'successful_configs': 0
-            }
-            import json
-            with open(args.training_summary, 'w') as f:
-                json.dump(error_summary, f, indent=2)
+        # CRITICAL: Write error output for Flow execution
+        # This ensures sidecar uploader has a file even if script fails
+        wf_io = WorkflowIO()
+        wf_io.write_error_output("training_summary", e, "nixtla_neuralforecast")
         raise
 
 if __name__ == "__main__":

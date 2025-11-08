@@ -436,6 +436,10 @@ def main():
             
     except Exception as e:
         logger.error(f"Error in model comparison: {e}")
+        # CRITICAL: Write error output for Flow execution
+        # This ensures sidecar uploader has a file even if script fails
+        wf_io = WorkflowIO()
+        wf_io.write_error_output("comparison_results", e, "model_comparison")
         raise
 
 if __name__ == "__main__":

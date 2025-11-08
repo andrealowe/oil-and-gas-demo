@@ -731,62 +731,70 @@ class OilGasDataGenerator:
 
 def main():
     """Main function to generate oil and gas synthetic datasets"""
+    try:
+        # Initialize generator
+        generator = OilGasDataGenerator("Oil-and-Gas-Demo")
 
-    # Initialize generator
-    generator = OilGasDataGenerator("Oil-and-Gas-Demo")
-    
-    print("🛢️  Oil & Gas Synthetic Data Generator")
-    print("=" * 50)
-    print(f"Project: {generator.project_name}")
-    print(f"Data directory: {generator.directories['data']}")
-    print(f"Artifacts directory: {generator.directories['artifacts']}")
-    print()
-    
-    # Generate geospatial data
-    print("📍 Generating geospatial facilities data...")
-    geospatial_df = generator.generate_geospatial_data(
-        n_wells=1500,
-        n_refineries=25, 
-        n_facilities=200
-    )
-    print(f"   Generated {len(geospatial_df)} facilities across {geospatial_df['region'].nunique()} regions")
-    
-    # Generate time series data
-    print("📈 Generating time series datasets...")
-    time_series_data = generator.generate_time_series_data(
-        geospatial_df, 
-        start_date='2022-01-01',
-        end_date='2024-12-31'
-    )
-    
-    for dataset_name, df in time_series_data.items():
-        print(f"   {dataset_name}: {len(df):,} records")
-    
-    # Validate data quality
-    print("✅ Validating data quality...")
-    all_data = {'geospatial': geospatial_df, **time_series_data}
-    quality_scores = generator.validate_data_quality(all_data)
-    
-    for dataset_name, score in quality_scores.items():
-        print(f"   {dataset_name}: {score:.3f}")
-    
-    overall_quality = np.mean(list(quality_scores.values()))
-    print(f"   Overall quality score: {overall_quality:.3f}")
-    
-    # Save datasets
-    print("💾 Saving datasets...")
-    saved_paths = generator.save_datasets(geospatial_df, time_series_data)
-    
-    print("📁 Files saved:")
-    for dataset_name, path in saved_paths.items():
-        print(f"   {dataset_name}: {path}")
-    
-    print()
-    print("✨ Oil & Gas synthetic data generation completed successfully!")
-    print(f"📊 MLflow experiment: oil_gas_data_generation_{generator.project_name}")
-    print(f"🌐 MLflow UI: http://localhost:8768")
-    
-    return saved_paths
+        print("🛢️  Oil & Gas Synthetic Data Generator")
+        print("=" * 50)
+        print(f"Project: {generator.project_name}")
+        print(f"Data directory: {generator.directories['data']}")
+        print(f"Artifacts directory: {generator.directories['artifacts']}")
+        print()
+
+        # Generate geospatial data
+        print("📍 Generating geospatial facilities data...")
+        geospatial_df = generator.generate_geospatial_data(
+            n_wells=1500,
+            n_refineries=25,
+            n_facilities=200
+        )
+        print(f"   Generated {len(geospatial_df)} facilities across {geospatial_df['region'].nunique()} regions")
+
+        # Generate time series data
+        print("📈 Generating time series datasets...")
+        time_series_data = generator.generate_time_series_data(
+            geospatial_df,
+            start_date='2022-01-01',
+            end_date='2024-12-31'
+        )
+
+        for dataset_name, df in time_series_data.items():
+            print(f"   {dataset_name}: {len(df):,} records")
+
+        # Validate data quality
+        print("✅ Validating data quality...")
+        all_data = {'geospatial': geospatial_df, **time_series_data}
+        quality_scores = generator.validate_data_quality(all_data)
+
+        for dataset_name, score in quality_scores.items():
+            print(f"   {dataset_name}: {score:.3f}")
+
+        overall_quality = np.mean(list(quality_scores.values()))
+        print(f"   Overall quality score: {overall_quality:.3f}")
+
+        # Save datasets
+        print("💾 Saving datasets...")
+        saved_paths = generator.save_datasets(geospatial_df, time_series_data)
+
+        print("📁 Files saved:")
+        for dataset_name, path in saved_paths.items():
+            print(f"   {dataset_name}: {path}")
+
+        print()
+        print("✨ Oil & Gas synthetic data generation completed successfully!")
+        print(f"📊 MLflow experiment: oil_gas_data_generation_{generator.project_name}")
+        print(f"🌐 MLflow UI: http://localhost:8768")
+
+        return saved_paths
+
+    except Exception as e:
+        print(f"❌ Error in data generation: {e}")
+        # CRITICAL: Write error output for Flow execution
+        # This ensures sidecar uploader has a file even if script fails
+        wf_io = WorkflowIO()
+        wf_io.write_error_output("data_summary", e, "data_generation")
+        raise
 
 if __name__ == "__main__":
     saved_paths = main()

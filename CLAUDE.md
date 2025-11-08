@@ -175,6 +175,206 @@ When working with Domino-specific features, agents should:
    - Deploy monitoring dashboards as Domino Apps
    - Use Domino Flows for production pipelines
 
+### 7. Domino Flows Development & Debugging
+
+**CRITICAL INFORMATION**: This section documents resolved issues and best practices for Domino Flows development. All scripts in this project have been debugged and are production-ready.
+
+#### Workflow I/O Requirements (✅ IMPLEMENTED)
+
+According to [Domino Flows documentation](https://docs.dominodatalab.com/en/cloud/user_guide/78acf5/orchestrate-with-flows/), tasks **MUST** write all declared outputs or they fail.
+
+**WorkflowIO Helper** (`/mnt/code/src/models/workflow_io.py`):
+- Automatically detects Flow vs standalone execution mode
+- Reads inputs from `/workflow/inputs/<name>`
+- Writes outputs to `/workflow/outputs/<name>`
+- Handles JSON serialization automatically
+
+**Usage Pattern** (implemented in all forecasting scripts):
+```python
+from src.models.workflow_io import WorkflowIO
+
+# In main() function
+wf_io = WorkflowIO()
+
+# Check if running in Flow mode
+if wf_io.is_workflow_job():
+    # Read flow inputs (establishes task dependencies)
+    data_prep = wf_io.read_input("data_prep")
+
+    # Write flow outputs (CRITICAL - must write ALL declared outputs)
+    wf_io.write_output("training_summary", summary)
+```
+
+#### Critical Fix: Sidecar Uploader Error (✅ RESOLVED)
+
+**Issue**: "failed to run the job: Workflow output contract not satisfied: sidecar uploader exited with code 1"
+
+**Root Cause**: Scripts failed BEFORE writing workflow outputs, leaving the sidecar uploader with no file to upload.
+
+**Solution Implemented**:
+Added `write_error_output()` method to WorkflowIO that ensures outputs are ALWAYS written, even on failure:
+
+```python
+try:
+    # Main execution
+    result = train_models()
+    wf_io.write_output("training_summary", result)
+except Exception as e:
+    logger.error(f"Error: {e}")
+    # CRITICAL: Write error output for Flow execution
+    wf_io.write_error_output("training_summary", e, "framework_name")
+    raise
+```
+
+**Error Output Structure**:
+```json
+{
+  "timestamp": "2025-11-08T13:45:00Z",
+  "framework": "autogluon",
+  "status": "error",
+  "error_message": "FileNotFoundError: ...",
+  "error_type": "FileNotFoundError",
+  "total_configs": 0,
+  "successful_configs": 0,
+  "best_config": null,
+  "best_mae": null
+}
+```
+
+**Updated Scripts** (all have proper error handling):
+- `/mnt/code/scripts/oil_gas_data_generator.py` → writes `data_summary`
+- `/mnt/code/src/models/autogluon_forecasting.py` → writes `training_summary`
+- `/mnt/code/src/models/prophet_forecasting.py` → writes `training_summary`
+- `/mnt/code/src/models/nixtla_forecasting.py` → writes `training_summary`
+- `/mnt/code/src/models/oil_gas_forecasting.py` → writes `training_summary`
+- `/mnt/code/src/models/model_comparison.py` → writes `comparison_results`
+
+#### Data Persistence Between Flow Tasks
+
+**Challenge**: Domino Flow tasks run in isolated environments. Data written by one task doesn't automatically persist to others unless stored in a shared Domino Dataset.
+
+**Two Solutions Implemented**:
+
+**Solution A: Auto-Generation Fallback** (✅ Current Implementation)
+- Each forecasting script calls `ensure_data_exists()` at startup
+- If data missing, automatically generates it
+- Works immediately without Domino configuration
+- Trade-off: Slower (4× data generation), but resilient
+
+**Solution B: Domino Dataset** (Recommended for Production)
+- Create Domino Dataset named "Oil-and-Gas-Demo"
+- Mount to `/mnt/data/Oil-and-Gas-Demo`
+- Configure Flow to mount dataset to all tasks
+- Data generated once, shared across all tasks
+- Much faster and more efficient
+
+#### Domino Flows Best Practices (All Implemented)
+
+✅ **Strongly Typed Inputs/Outputs**
+```python
+from typing import TypeVar
+from flytekit.types.file import FlyteFile
+
+# CORRECT - TypeVar is mandatory
+outputs={"training_summary": FlyteFile[TypeVar("json")]}
+
+# WRONG - Will cause type errors
+outputs={"training_summary": FlyteFile}
+```
+
+✅ **Explicit Task Dependencies**
+```python
+# Create dependency by passing output as input
+data_result = data_prep_task()
+training_result = training_task(data_prep=data_result["data_summary"])
+```
+
+✅ **Side-Effect Free Tasks**
+- Tasks read versioned inputs
+- Tasks write defined outputs
+- No shared state contamination
+- Reproducible execution
+
+✅ **Dual-Mode Scripts**
+- All scripts work standalone for development
+- All scripts work in Flows for production
+- Automatic mode detection via `WorkflowIO.is_workflow_job()`
+
+#### Current Workflow Structure (`/mnt/code/scripts/flows.py`)
+
+```python
+@workflow
+def oil_gas_automl_forecasting_workflow():
+    # Step 1: Data Generation
+    data_result = data_prep_task()  # Output: data_summary
+
+    # Step 2: Parallel Training (all depend on data_result)
+    autogluon_result = autogluon_task(data_prep=data_result["data_summary"])
+    prophet_result = prophet_task(data_prep=data_result["data_summary"])
+    nixtla_result = nixtla_task(data_prep=data_result["data_summary"])
+    combined_result = combined_task(data_prep=data_result["data_summary"])
+    # Each outputs: training_summary
+
+    # Step 3: Model Comparison (sequential after training)
+    comparison_result = comparison_task(
+        autogluon_summary=autogluon_result["training_summary"],
+        prophet_summary=prophet_result["training_summary"],
+        nixtla_summary=nixtla_result["training_summary"],
+        combined_summary=combined_result["training_summary"]
+    )  # Output: comparison_results
+
+    return comparison_result
+```
+
+#### Troubleshooting Guide
+
+**"Sidecar uploader exited with code 1"**
+- Check: Does script write to `/workflow/outputs/<declared_output_name>`?
+- Check: Does error handler also write error output?
+- Solution: Use `WorkflowIO.write_error_output()` in exception handlers
+
+**"FileNotFoundError: production_timeseries.parquet"**
+- Reason: Task running in isolated environment without shared data
+- Check: Is auto-generation enabled? (Look for "Checking data availability..." in logs)
+- Solution A: Current implementation auto-generates data
+- Solution B: Set up Domino Dataset for better performance
+
+**"Task fails but no clear error message"**
+- Check: Does task declare outputs that don't get written?
+- Check: Workflow output files in `/workflow/outputs/` directory
+- Solution: Ensure ALL declared outputs are written in success AND error cases
+
+**"Workflow is slow"**
+- Reason: Auto-generation running 4× (once per training task)
+- Solution: Set up Domino Dataset (Solution B above) to share data
+
+#### Testing Flows Locally
+
+```bash
+# Test individual scripts standalone
+python scripts/oil_gas_data_generator.py
+python src/models/autogluon_forecasting.py
+python src/models/prophet_forecasting.py
+python src/models/nixtla_forecasting.py
+python src/models/oil_gas_forecasting.py
+python src/models/model_comparison.py
+
+# All scripts detect standalone mode and work without workflow I/O
+```
+
+#### Summary of Fixes Applied
+
+| Issue | Status | Files Modified |
+|-------|--------|----------------|
+| Sidecar uploader error | ✅ FIXED | 6 workflow scripts + workflow_io.py |
+| Missing workflow outputs | ✅ FIXED | All training scripts |
+| Data not persisting | ✅ FIXED | Added auto-generation + ensure_data.py |
+| FlyteFile TypeVar missing | ✅ FIXED | flows.py (23 task definitions) |
+| Inconsistent error handling | ✅ FIXED | All 6 workflow scripts |
+| Data path configuration | ✅ FIXED | data_config.py + all scripts |
+
+**Status**: All Domino Flows issues resolved. Workflow is production-ready and tested. ✅
+
 ## Technology Stack
 
 - **Platform**: Domino Data Lab (MLOps orchestration)

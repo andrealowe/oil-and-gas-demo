@@ -170,6 +170,34 @@ class WorkflowIO:
                 default_data = {"status": "completed", "message": "No data generated"}
             self.write_output(name, default_data)
 
+    def write_error_output(self, name: str, error: Exception, framework: str = "unknown") -> None:
+        """
+        Write an error output when script fails.
+
+        This ensures the sidecar uploader has an output file even if the script crashes.
+
+        Args:
+            name: Output name (e.g., "training_summary")
+            error: The exception that occurred
+            framework: Framework name (e.g., "autogluon", "prophet")
+        """
+        from datetime import datetime
+
+        error_data = {
+            "timestamp": datetime.now().isoformat(),
+            "framework": framework,
+            "status": "error",
+            "error_message": str(error),
+            "error_type": type(error).__name__,
+            "total_configs": 0,
+            "successful_configs": 0,
+            "best_config": None,
+            "best_mae": None
+        }
+
+        logger.error(f"Writing error output for '{name}': {error}")
+        self.write_output(name, error_data)
+
 
 # Convenience functions for quick use
 def is_workflow_job() -> bool:
