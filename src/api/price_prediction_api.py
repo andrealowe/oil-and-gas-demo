@@ -53,24 +53,42 @@ class PricePredictionAPI:
         
         Args:
             input_data (dict): Input parameters for prediction
-                - forecast_days (int): Number of days to forecast
-                - start_date (str): Start date for forecast (YYYY-MM-DD)
-                - commodity (str): 'crude_oil' or 'natural_gas'
-                - market_indicators (dict): Optional market context
+                Expected format:
+                {
+                  "data": {
+                    "start": 1,      # Starting day index (1-based)
+                    "stop": 100      # Ending day index (1-based, inclusive)
+                  },
+                  "commodity": "crude_oil",  # Optional: 'crude_oil' or 'natural_gas'
+                  "market_indicators": {}    # Optional: market context
+                }
         
         Returns:
             dict: Price prediction results
         """
         try:
-            # Extract input parameters
-            forecast_days = input_data.get('forecast_days', 30)
-            start_date = input_data.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+            # Extract data parameters with new format
+            data_params = input_data.get('data', {})
+            start_day = data_params.get('start', 1)
+            stop_day = data_params.get('stop', 30)
+            
+            # Calculate forecast parameters
+            forecast_days = stop_day - start_day + 1  # Inclusive range
+            start_date = (datetime.now() + timedelta(days=start_day - 1)).strftime('%Y-%m-%d')
+            
+            # Extract optional parameters
             commodity = input_data.get('commodity', 'crude_oil')
             market_indicators = input_data.get('market_indicators', {})
             
             # Validate inputs
-            if forecast_days <= 0 or forecast_days > 365:
-                raise ValueError("forecast_days must be between 1 and 365")
+            if start_day < 1 or stop_day < 1:
+                raise ValueError("start and stop indices must be >= 1")
+            
+            if start_day > stop_day:
+                raise ValueError("start index must be <= stop index")
+                
+            if forecast_days > 365:
+                raise ValueError("forecast range cannot exceed 365 days")
             
             if commodity not in ['crude_oil', 'natural_gas']:
                 raise ValueError("commodity must be 'crude_oil' or 'natural_gas'")
@@ -78,7 +96,7 @@ class PricePredictionAPI:
             try:
                 start_dt = datetime.strptime(start_date, '%Y-%m-%d')
             except ValueError:
-                raise ValueError("start_date must be in YYYY-MM-DD format")
+                raise ValueError("calculated start_date format error")
             
             # Generate forecast dates
             forecast_dates = [
@@ -158,6 +176,10 @@ class PricePredictionAPI:
             response = {
                 'model_info': self.model_info,
                 'input_parameters': {
+                    'data': {
+                        'start': start_day,
+                        'stop': stop_day
+                    },
                     'forecast_days': forecast_days,
                     'start_date': start_date,
                     'commodity': commodity,
@@ -215,15 +237,17 @@ def predict_prices(input_data):
 
 # Example usage and testing
 if __name__ == "__main__":
-    # Test the API with crude oil prediction
+    # Test the API with crude oil prediction using new format
     test_input_oil = {
-        'forecast_days': 30,
-        'start_date': '2024-11-09',
-        'commodity': 'crude_oil',
-        'market_indicators': {
-            'supply_disruption': True,
-            'demand_surge': False,
-            'economic_downturn': False
+        "data": {
+            "start": 1,
+            "stop": 30
+        },
+        "commodity": "crude_oil",
+        "market_indicators": {
+            "supply_disruption": True,
+            "demand_surge": False,
+            "economic_downturn": False
         }
     }
     
@@ -234,15 +258,17 @@ if __name__ == "__main__":
     result_oil = predict_prices(test_input_oil)
     print(f"\nCrude Oil Summary: {json.dumps(result_oil['summary'], indent=2)}")
     
-    # Test with natural gas
+    # Test with natural gas using shorter range
     test_input_gas = {
-        'forecast_days': 14,
-        'start_date': '2024-12-01',  # Winter period
-        'commodity': 'natural_gas',
-        'market_indicators': {
-            'supply_disruption': False,
-            'demand_surge': True,  # Winter heating demand
-            'economic_downturn': False
+        "data": {
+            "start": 10,
+            "stop": 25
+        },
+        "commodity": "natural_gas",
+        "market_indicators": {
+            "supply_disruption": False,
+            "demand_surge": True,  # Winter heating demand
+            "economic_downturn": False
         }
     }
     

@@ -1,5 +1,13 @@
 echo -e "import os\nprint('https://se-demo.domino.tech/{}/{}/notebookSession/{}/proxy/8501/'.format(os.environ['DOMINO_PROJECT_OWNER'], os.environ['DOMINO_PROJECT_NAME'], os.environ['DOMINO_RUN_ID']))" | python3
 
+Can you give me the expected input for the price prediction API (/mnt/code/src/api/price_prediction_api.py). It should follow this format:
+{
+  "data": {
+    "start": 1,
+    "stop": 100
+  }
+}
+
 📈 Price Prediction API
 
   Location: /mnt/code/src/api/price_prediction_api.py

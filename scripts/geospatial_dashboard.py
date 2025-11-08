@@ -146,7 +146,7 @@ def load_geospatial_data():
     """Load geospatial facilities data with caching and optimization"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['artifacts_path'] / 'Oil-and-Gas-Demo' / 'geospatial_facilities.parquet'
+        data_path = paths['base_data_path'] / 'geospatial_facilities.parquet'
         
         if data_path.exists():
             # Load only essential columns to reduce memory usage
@@ -220,7 +220,7 @@ def load_production_data():
     """Load production time series data with optimization"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['artifacts_path'] / 'Oil-and-Gas-Demo' / 'production_timeseries.parquet'
+        data_path = paths['base_data_path'] / 'production_timeseries.parquet'
         
         if data_path.exists():
             # Load only recent data to reduce memory usage

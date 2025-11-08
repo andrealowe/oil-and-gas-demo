@@ -333,7 +333,7 @@ def load_production_timeseries():
     """Load production time series data with caching"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['artifacts_path'] / 'Oil-and-Gas-Demo' / 'production_timeseries.parquet'
+        data_path = paths['base_data_path'] / 'production_timeseries.parquet'
         df = pd.read_parquet(data_path)
         df['date'] = pd.to_datetime(df['date'])
         return df
@@ -346,7 +346,7 @@ def load_price_data():
     """Load price time series data with caching"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['artifacts_path'] / 'Oil-and-Gas-Demo' / 'prices_timeseries.parquet'
+        data_path = paths['base_data_path'] / 'prices_timeseries.parquet'
         df = pd.read_parquet(data_path)
         if 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date'])
@@ -360,7 +360,7 @@ def load_demand_data():
     """Load demand time series data with caching"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['artifacts_path'] / 'Oil-and-Gas-Demo' / 'demand_timeseries.parquet'
+        data_path = paths['base_data_path'] / 'demand_timeseries.parquet'
         df = pd.read_parquet(data_path)
         if 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date'])
@@ -374,7 +374,7 @@ def load_maintenance_data():
     """Load maintenance time series data with caching"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['artifacts_path'] / 'Oil-and-Gas-Demo' / 'maintenance_timeseries.parquet'
+        data_path = paths['base_data_path'] / 'maintenance_timeseries.parquet'
         df = pd.read_parquet(data_path)
         if 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date'])
