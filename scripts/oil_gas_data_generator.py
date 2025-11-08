@@ -731,9 +731,9 @@ class OilGasDataGenerator:
 
 def main():
     """Main function to generate oil and gas synthetic datasets"""
-    
+
     # Initialize generator
-    generator = OilGasDataGenerator("oil_gas_dashboards")
+    generator = OilGasDataGenerator("Oil-and-Gas-Demo")
     
     print("🛢️  Oil & Gas Synthetic Data Generator")
     print("=" * 50)

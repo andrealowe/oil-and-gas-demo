@@ -25,7 +25,7 @@ warnings.filterwarnings('ignore')
 # Add scripts directory to path for data_config import
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths
-from src.models.forecasting_config import ForecastingConfig
+from src.models.forecasting_config import ForecastingConfig, get_standard_configs
 from src.models.ensure_data import ensure_data_exists
 from src.models.workflow_io import WorkflowIO
 
