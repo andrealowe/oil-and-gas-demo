@@ -1,0 +1,92 @@
+# .modelignore - Exclude files not needed for API deployment
+# Only include essential files for the prediction API
+
+# Exclude all files by default, then include only what's needed
+*
+
+# Include essential API files
+!src/api/
+!src/api/prediction_api.py
+
+# Include model utilities and configuration
+!scripts/data_config.py
+!src/models/workflow_io.py
+
+# Include requirements for dependencies
+!requirements.txt
+
+# Include model documentation (lightweight)
+!model_card_short.md
+
+# Exclude all other directories and files
+notebooks/
+docs/
+tests/
+config/
+scripts/flows.py
+scripts/oil_gas_data_generator.py
+scripts/register_model_metadata.py
+scripts/generate_model_validation_report.py
+
+# Exclude all model training scripts
+src/models/autogluon_forecasting.py
+src/models/prophet_forecasting.py
+src/models/nixtla_forecasting.py
+src/models/oil_gas_forecasting.py
+src/models/model_comparison.py
+src/models/forecasting_config.py
+
+# Exclude data and artifacts
+data/
+*.parquet
+*.csv
+*.pkl
+*.json
+
+# Exclude temporary and cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.coverage
+*.log
+
+# Exclude development files
+.git/
+.gitignore
+.vscode/
+.idea/
+*.md
+!model_card_short.md
+
+# Exclude generated reports and charts
+*.pdf
+*.png
+*.jpg
+*.jpeg
+
+# Exclude ML artifacts
+models/
+artifacts/
+mlruns/
+lightning_logs/
+
+# Exclude environment files
+.env
+.env.local
+.env.*.local
+
+# Exclude OS files
+.DS_Store
+Thumbs.db
+
+# Exclude large model files (rely on MLflow Model Registry)
+*.model
+*.joblib
+*.h5
+*.onnx
+*.pt
+*.pth

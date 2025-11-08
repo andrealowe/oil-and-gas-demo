@@ -46,30 +46,39 @@ def register_model_card(client, model_name, model_card_path):
         raise
 
 def add_model_tags(client, model_name):
-    """Add relevant tags to the registered model"""
+    """Add relevant tags to the registered model using proper tag format"""
     
-    # Define 5 relevant tags for oil & gas forecasting model
+    # Define 5 relevant tags for oil & gas forecasting model (not performance metrics)
     tags = {
-        "domain": "oil_and_gas",
-        "use_case": "production_forecasting", 
-        "model_type": "automl_time_series",
-        "deployment_status": "champion",
-        "business_impact": "operational_planning"
+        "risk-level": "medium",
+        "industry": "oil_and_gas", 
+        "model-category": "time_series_forecasting",
+        "business-criticality": "high",
+        "data-sensitivity": "internal"
     }
     
     try:
+        # Check if model exists, if not create it with tags
+        try:
+            model = client.get_registered_model(model_name)
+            logger.info(f"Model '{model_name}' already exists, adding tags...")
+        except:
+            logger.info(f"Model '{model_name}' not found, but it should exist from previous registration")
+        
+        # Add tags using set_registered_model_tag
         for key, value in tags.items():
             client.set_registered_model_tag(model_name, key, value)
             logger.info(f"✓ Added tag: {key} = {value}")
         
         logger.info(f"Successfully added {len(tags)} tags to '{model_name}'")
+        return tags
         
     except Exception as e:
         logger.error(f"Error adding model tags: {e}")
         raise
 
 def add_version_tags(client, model_name, model_version):
-    """Add tags to specific model version"""
+    """Add performance tags to specific model version"""
     
     # Get the best run metrics from the champion model version
     try:
@@ -78,38 +87,43 @@ def add_version_tags(client, model_name, model_version):
         run_metrics = run.data.metrics
         run_params = run.data.params
         
-        # Version tags (top 5 most relevant) - these go on the model VERSION
+        # Version tags (top 5 most relevant performance metrics) - these go on the model VERSION
         version_tags = {
             "mae": f"{run_metrics.get('best_mae', run_metrics.get('mae', 0)):.4f}",
             "rmse": f"{run_metrics.get('rmse', 0):.4f}",
-            "mape": f"{run_metrics.get('mape', 0):.4f}%",
+            "mape": f"{run_metrics.get('mape', 0):.2f}",
             "training_time_min": f"{(run.info.end_time - run.info.start_time) / 60000:.2f}" if run.info.end_time else "unknown",
-            "framework": run_params.get('framework', run_params.get('best_config', 'automl_comparison'))
+            "champion_framework": run_params.get('framework', run_params.get('best_config', 'automl_comparison'))
         }
         
-        # Add version tags
+        # Add version tags using set_model_version_tag
         for key, value in version_tags.items():
-            client.set_model_version_tag(model_name, model_version.version, key, value)
-            logger.info(f"✓ Added version tag: {key} = {value}")
+            try:
+                client.set_model_version_tag(model_name, model_version.version, key, value)
+                logger.info(f"✓ Added version tag: {key} = {value}")
+            except Exception as tag_error:
+                logger.warning(f"Could not add version tag {key}: {tag_error}")
         
-        logger.info(f"Successfully added {len(version_tags)} version tags to '{model_name}' version {model_version.version}")
+        logger.info(f"Successfully added version tags to '{model_name}' version {model_version.version}")
         return version_tags
         
     except Exception as e:
-        logger.error(f"Error adding version tags: {e}")
+        logger.error(f"Error retrieving run metrics for version tags: {e}")
+        
         # Fallback version tags if metrics can't be retrieved
         fallback_tags = {
-            "mae": "best_performer",
-            "framework": "automl_comparison", 
             "status": "champion",
-            "validation": "80_20_split",
-            "selection": "automated"
+            "framework": "automl_comparison", 
+            "validation": "temporal_split",
+            "selection_method": "automated_mae",
+            "data_type": "oil_production"
         }
         
         try:
             for key, value in fallback_tags.items():
                 client.set_model_version_tag(model_name, model_version.version, key, value)
-            logger.info(f"✓ Added {len(fallback_tags)} fallback version tags")
+                logger.info(f"✓ Added fallback version tag: {key} = {value}")
+            logger.info(f"Added {len(fallback_tags)} fallback version tags")
             return fallback_tags
         except Exception as e2:
             logger.error(f"Error adding fallback version tags: {e2}")
@@ -174,7 +188,7 @@ def main():
         
         # 2. Add model-level tags
         logger.info("\n2. Adding Model Tags...")
-        add_model_tags(client, model_name)
+        model_tags = add_model_tags(client, model_name)
         
         # 3. Add version-level tags (get latest version)
         logger.info("\n3. Adding Version Tags...")
@@ -196,11 +210,9 @@ def main():
         # Display summary
         logger.info("\n=== Summary ===")
         logger.info("Model-Level Tags Added:")
-        logger.info("  - domain: oil_and_gas")
-        logger.info("  - use_case: production_forecasting")
-        logger.info("  - model_type: automl_time_series") 
-        logger.info("  - deployment_status: champion")
-        logger.info("  - business_impact: operational_planning")
+        if 'model_tags' in locals():
+            for key, value in model_tags.items():
+                logger.info(f"  - {key}: {value}")
         
         if version_tags:
             logger.info("\nVersion-Level Tags Added:")
@@ -212,6 +224,8 @@ def main():
             for key, value in model_specs.items():
                 spec_name = key.replace('mlflow.domino.specs.', '')
                 logger.info(f"  - {spec_name}: {value}")
+        
+        logger.info("\nNote: Version tags contain performance metrics, model tags contain governance/business metadata")
         
     except Exception as e:
         logger.error(f"Error in main execution: {e}")
