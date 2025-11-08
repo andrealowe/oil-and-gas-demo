@@ -1,0 +1,16 @@
+[theme]
+# Light theme configuration for Oil & Gas dashboards
+primaryColor = "#3b82f6"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8f9fa"
+textColor = "#000000"
+font = "sans serif"
+
+[browser]
+# Prevent server from attempting to gather usage stats
+gatherUsageStats = false
+
+[server]
+# Application configuration
+runOnSave = true
+port = 8501

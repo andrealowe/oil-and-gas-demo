@@ -36,9 +36,64 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Professional MLOps Platform CSS
+# Force light theme by setting theme in session state
+if 'theme' not in st.session_state:
+    st.session_state.theme = 'light'
+
+# Professional MLOps Platform CSS with Light Mode Override
 st.markdown("""
 <style>
+    /* Force light theme override - prevents dark mode */
+    .stApp {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    .stApp > .main {
+        background-color: #ffffff !important;
+    }
+    
+    .stSidebar {
+        background-color: #f8f9fa !important;
+    }
+    
+    .stSidebar .stMarkdown {
+        color: #000000 !important;
+    }
+    
+    /* Override any dark mode text and elements */
+    .stMarkdown, .stText, p, span, div, h1, h2, h3, h4, h5, h6 {
+        color: #000000 !important;
+    }
+    
+    /* Force light mode for specific Streamlit components */
+    .stSelectbox > div > div {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    .stTextInput > div > div > input {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    .stDateInput > div > div > input {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    /* Override media query that detects dark mode */
+    @media (prefers-color-scheme: dark) {
+        .stApp {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+        
+        .stApp > .main {
+            background-color: #ffffff !important;
+        }
+    }
+    
     /* Professional MLOps color scheme */
     :root {
         --primary-blue: #1f2937;
