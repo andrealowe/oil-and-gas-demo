@@ -53,39 +53,57 @@ class DemandForecastAPI:
         
         Args:
             input_data (dict): Input parameters for prediction
-                - forecast_days (int): Number of days to forecast
-                - start_date (str): Start date for forecast (YYYY-MM-DD)
-                - region (str): Geographic region ('north_america', 'europe', 'asia_pacific', 'global')
-                - commodity (str): 'crude_oil', 'natural_gas', or 'refined_products'
-                - economic_factors (dict): Optional economic context
+                Expected format:
+                {
+                  "data": {
+                    "start": 1,      # Starting day index (1-based)
+                    "stop": 100      # Ending day index (1-based, inclusive)
+                  },
+                  "region": "north_america",     # Optional: region or "global"
+                  "commodity": "crude_oil",      # Optional: commodity type
+                  "economic_factors": {}         # Optional: economic context
+                }
         
         Returns:
             dict: Demand forecast results
         """
         try:
-            # Extract input parameters
-            forecast_days = input_data.get('forecast_days', 30)
-            start_date = input_data.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+            # Extract data parameters with new format
+            data_params = input_data.get('data', {})
+            start_day = data_params.get('start', 1)
+            stop_day = data_params.get('stop', 30)
+            
+            # Calculate forecast parameters
+            forecast_days = stop_day - start_day + 1  # Inclusive range
+            start_date = (datetime.now() + timedelta(days=start_day - 1)).strftime('%Y-%m-%d')
+            
+            # Extract optional parameters
             region = input_data.get('region', 'global')
             commodity = input_data.get('commodity', 'crude_oil')
             economic_factors = input_data.get('economic_factors', {})
             
             # Validate inputs
-            if forecast_days <= 0 or forecast_days > 365:
-                raise ValueError("forecast_days must be between 1 and 365")
+            if start_day < 1 or stop_day < 1:
+                raise ValueError("start and stop indices must be >= 1")
             
-            valid_regions = ['north_america', 'europe', 'asia_pacific', 'global']
+            if start_day > stop_day:
+                raise ValueError("start index must be <= stop index")
+                
+            if forecast_days > 365:
+                raise ValueError("forecast range cannot exceed 365 days")
+            
+            valid_regions = ['north_america', 'europe', 'asia_pacific', 'middle_east', 'south_america', 'africa', 'global']
             if region not in valid_regions:
                 raise ValueError(f"region must be one of {valid_regions}")
             
-            valid_commodities = ['crude_oil', 'natural_gas', 'refined_products']
+            valid_commodities = ['crude_oil', 'natural_gas', 'refined_products', 'gasoline', 'diesel', 'jet_fuel']
             if commodity not in valid_commodities:
                 raise ValueError(f"commodity must be one of {valid_commodities}")
             
             try:
                 start_dt = datetime.strptime(start_date, '%Y-%m-%d')
             except ValueError:
-                raise ValueError("start_date must be in YYYY-MM-DD format")
+                raise ValueError("calculated start_date format error")
             
             # Generate forecast dates
             forecast_dates = [
@@ -209,6 +227,10 @@ class DemandForecastAPI:
             response = {
                 'model_info': self.model_info,
                 'input_parameters': {
+                    'data': {
+                        'start': start_day,
+                        'stop': stop_day
+                    },
                     'forecast_days': forecast_days,
                     'start_date': start_date,
                     'region': region,

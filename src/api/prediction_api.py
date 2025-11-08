@@ -60,27 +60,50 @@ class ProductionForecastingAPI:
         
         Args:
             input_data (dict): Input parameters for prediction
-                - forecast_days (int): Number of days to forecast
-                - start_date (str): Start date for forecast (YYYY-MM-DD)
-                - facility_id (str, optional): Specific facility ID
+                Expected format:
+                {
+                  "data": {
+                    "start": 1,      # Starting day index (1-based)
+                    "stop": 100      # Ending day index (1-based, inclusive)
+                  },
+                  "facility_id": "WELL_000001",  # Optional: specific facility or "all_facilities"
+                  "aggregation": "total"         # Optional: "total", "average", or "facility"
+                }
         
         Returns:
             dict: Prediction results with forecasted values
         """
         try:
-            # Extract input parameters
-            forecast_days = input_data.get('forecast_days', 7)
-            start_date = input_data.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+            # Extract data parameters with new format
+            data_params = input_data.get('data', {})
+            start_day = data_params.get('start', 1)
+            stop_day = data_params.get('stop', 7)
+            
+            # Calculate forecast parameters
+            forecast_days = stop_day - start_day + 1  # Inclusive range
+            start_date = (datetime.now() + timedelta(days=start_day - 1)).strftime('%Y-%m-%d')
+            
+            # Extract optional parameters
             facility_id = input_data.get('facility_id', 'all_facilities')
+            aggregation = input_data.get('aggregation', 'total')
             
             # Validate inputs
-            if forecast_days <= 0 or forecast_days > 365:
-                raise ValueError("forecast_days must be between 1 and 365")
+            if start_day < 1 or stop_day < 1:
+                raise ValueError("start and stop indices must be >= 1")
+            
+            if start_day > stop_day:
+                raise ValueError("start index must be <= stop index")
+                
+            if forecast_days > 365:
+                raise ValueError("forecast range cannot exceed 365 days")
+            
+            if aggregation not in ['total', 'average', 'facility']:
+                raise ValueError("aggregation must be 'total', 'average', or 'facility'")
             
             try:
                 start_dt = datetime.strptime(start_date, '%Y-%m-%d')
             except ValueError:
-                raise ValueError("start_date must be in YYYY-MM-DD format")
+                raise ValueError("calculated start_date format error")
             
             # Generate forecast dates
             forecast_dates = [
@@ -112,9 +135,14 @@ class ProductionForecastingAPI:
             response = {
                 'model_info': self.model_info,
                 'input_parameters': {
+                    'data': {
+                        'start': start_day,
+                        'stop': stop_day
+                    },
                     'forecast_days': forecast_days,
                     'start_date': start_date,
-                    'facility_id': facility_id
+                    'facility_id': facility_id,
+                    'aggregation': aggregation
                 },
                 'predictions': predictions,
                 'summary': {
