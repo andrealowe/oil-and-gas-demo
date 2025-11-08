@@ -52,52 +52,58 @@ def oil_gas_automl_forecasting_workflow():
 
     # Step 2: Training tasks - run in parallel (depend on data preparation)
     # Each task produces training summary and model artifacts as outputs
+    # All tasks have data_prep dependency to ensure data exists before training
 
     autogluon_task = DominoJobTask(
         name="Train AutoGluon TimeSeries Models",
         domino_job_config=DominoJobConfig(
             Command="python src/models/autogluon_forecasting.py"
         ),
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
         outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
-    
+
     prophet_task = DominoJobTask(
         name="Train Prophet and NeuralProphet Models",
         domino_job_config=DominoJobConfig(
             Command="python src/models/prophet_forecasting.py"
         ),
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
         outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
-    
+
     nixtla_task = DominoJobTask(
         name="Train Nixtla NeuralForecast Models",
         domino_job_config=DominoJobConfig(
             Command="python src/models/nixtla_forecasting.py"
         ),
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
         outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
-    
+
     combined_model_task = DominoJobTask(
         name="Train Combined LightGBM + ARIMA Model",
         domino_job_config=DominoJobConfig(
             Command="python src/models/oil_gas_forecasting.py"
         ),
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
         outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
-    
-    # Execute all training tasks in parallel
-    autogluon_result = autogluon_task()
-    prophet_result = prophet_task()
-    nixtla_result = nixtla_task()
-    combined_result = combined_model_task()
+
+    # Execute all training tasks in parallel - they all depend on data_result
+    # This ensures data generation completes before any training task starts
+    autogluon_result = autogluon_task(data_prep=data_result["data_summary"])
+    prophet_result = prophet_task(data_prep=data_result["data_summary"])
+    nixtla_result = nixtla_task(data_prep=data_result["data_summary"])
+    combined_result = combined_model_task(data_prep=data_result["data_summary"])
     
     # Model comparison task - has inputs that depend on all training task outputs
     # This creates the sequential dependency after parallel training

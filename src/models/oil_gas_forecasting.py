@@ -30,6 +30,7 @@ import logging
 # Add scripts directory to path for data_config import
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths, ensure_directories
+from src.models.ensure_data import ensure_data_exists
 
 # Time series libraries
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
@@ -762,6 +763,11 @@ class OilGasTimeSeriesForecaster:
 
 def main():
     """Main execution function"""
+    # Ensure data exists (will generate if missing)
+    print("Checking data availability...")
+    ensure_data_exists('Oil-and-Gas-Demo')
+    print("Data check complete")
+
     forecaster = OilGasTimeSeriesForecaster()
     result = forecaster.run_complete_forecasting_pipeline()
     print("Pipeline Result:")

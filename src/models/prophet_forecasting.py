@@ -25,6 +25,7 @@ warnings.filterwarnings('ignore')
 # Add scripts directory to path for data_config import
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths
+from src.models.ensure_data import ensure_data_exists
 from src.models.forecasting_config import ForecastingConfig, get_standard_configs
 
 # Configure logging
@@ -247,9 +248,14 @@ def main(args=None):
         # Parse arguments
         if args is None:
             args = parse_arguments()
-        
+
         logger.info("Starting Prophet forecasting experiment")
-        
+
+        # Ensure data exists (will generate if missing)
+        logger.info("Checking data availability...")
+        ensure_data_exists('Oil-and-Gas-Demo')
+        logger.info("Data check complete")
+
         # Setup
         experiment_id = setup_mlflow()
         

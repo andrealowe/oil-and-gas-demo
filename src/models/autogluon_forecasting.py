@@ -25,7 +25,8 @@ warnings.filterwarnings('ignore')
 # Add scripts directory to path for data_config import
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths
-from src.models.forecasting_config import ForecastingConfig, get_standard_configs
+from src.models.forecasting_config import ForecastingConfig
+from src.models.ensure_data import ensure_data_exists
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -57,7 +58,27 @@ def load_and_prepare_data():
         # Get data paths
         paths = get_data_paths('Oil-and-Gas-Demo')
         data_path = paths['base_data_path'] / 'production_timeseries.parquet'
-        
+
+        # Check if data file exists
+        if not data_path.exists():
+            error_msg = f"""
+            Data file not found: {data_path}
+
+            This usually happens when:
+            1. Running in Domino Flows without data generation step
+            2. Data generator hasn't been run yet
+
+            Solutions:
+            - For local development: Run 'python scripts/oil_gas_data_generator.py' first
+            - For Domino Flows: Ensure workflow includes data generation task
+            - Check that data is written to: {paths['base_data_path']}
+
+            Available files in data directory:
+            {list(paths['base_data_path'].glob('*.parquet')) if paths['base_data_path'].exists() else 'Directory does not exist'}
+            """
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+
         logger.info(f"Loading data from: {data_path}")
         df = pd.read_parquet(data_path)
         
@@ -240,9 +261,15 @@ def main(args=None):
         # Parse arguments
         if args is None:
             args = parse_arguments()
-        
+
         logger.info("Starting AutoGluon forecasting experiment")
-        
+
+        # Ensure data exists (will generate if missing)
+        # This is critical for Domino Flows where data may not persist between tasks
+        logger.info("Checking data availability...")
+        ensure_data_exists('Oil-and-Gas-Demo')
+        logger.info("Data check complete")
+
         # Setup
         experiment_id = setup_mlflow()
         
