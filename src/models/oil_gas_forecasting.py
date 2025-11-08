@@ -818,11 +818,9 @@ def write_training_summary(result):
 
         logger.info(f"Training summary saved to: {summary_path}")
 
-        # Write to workflow outputs if directory exists (Flow mode)
-        workflow_output = Path("/workflow/outputs/training_summary")
-        if workflow_output.parent.exists():
-            workflow_output.write_text(json.dumps(summary))
-            logger.info(f"✓ Wrote workflow output to {workflow_output}")
+        # Write to workflow outputs using WorkflowIO (Flow mode)
+        if wf_io.is_workflow_job():
+            wf_io.write_output("training_summary", summary)
 
         return summary
 
@@ -848,19 +846,9 @@ def main():
 
     except Exception as e:
         logger.error(f"Error in main execution: {e}")
-        # CRITICAL: Write error output for Flow execution
-        # This ensures sidecar uploader has a file even if script fails
-        workflow_output = Path("/workflow/outputs/training_summary")
-        if workflow_output.parent.exists():
-            error_data = {
-                'timestamp': datetime.now().isoformat(),
-                'framework': 'combined_lightgbm_arima',
-                'status': 'error',
-                'error_message': str(e),
-                'error_type': type(e).__name__
-            }
-            workflow_output.write_text(json.dumps(error_data))
-            logger.info(f"✓ Wrote error output to {workflow_output}")
+        # CRITICAL: Write error output for Flow execution using WorkflowIO
+        wf_io = WorkflowIO()
+        wf_io.write_error_output("training_summary", e, "combined_lightgbm_arima")
         raise
 
 if __name__ == "__main__":

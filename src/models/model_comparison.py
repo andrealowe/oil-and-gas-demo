@@ -439,12 +439,9 @@ def main():
                     'champion_framework': None,
                     'champion_mae': None
                 }
-                # Write to workflow output - simplified for Flow compatibility
-                OUT_DIR = Path("/workflow/outputs")
-                OUT_DIR.mkdir(parents=True, exist_ok=True)
-                OUT_FILE = OUT_DIR / "comparison_results"
-                OUT_FILE.write_text(json.dumps(error_result))
-                logger.info(f"✓ Wrote error output to {OUT_FILE}")
+                # Write error output using WorkflowIO
+                wf_io = WorkflowIO()
+                wf_io.write_output("comparison_results", error_result)
                 return
 
             # Create results summary for workflow output
@@ -464,12 +461,9 @@ def main():
             logger.info(f"Champion Config: {comparison_data['champion_config']}")
             logger.info(f"Champion MAE: {comparison_data['champion_mae']:.4f}")
 
-            # Write to workflow output - simplified for Flow compatibility
-            OUT_DIR = Path("/workflow/outputs")
-            OUT_DIR.mkdir(parents=True, exist_ok=True)
-            OUT_FILE = OUT_DIR / "comparison_results"
-            OUT_FILE.write_text(json.dumps(results_summary))
-            logger.info(f"✓ Wrote workflow output to {OUT_FILE}")
+            # Write results using WorkflowIO
+            wf_io = WorkflowIO()
+            wf_io.write_output("comparison_results", results_summary)
 
             return results_summary
 
@@ -556,20 +550,9 @@ def main():
             
     except Exception as e:
         logger.error(f"Error in model comparison: {e}")
-        # CRITICAL: Write error output for Flow execution
-        # This ensures sidecar uploader has a file even if script fails
-        OUT_DIR = Path("/workflow/outputs")
-        OUT_DIR.mkdir(parents=True, exist_ok=True)
-        OUT_FILE = OUT_DIR / "comparison_results"
-        error_data = {
-            'timestamp': datetime.now().isoformat(),
-            'framework': 'model_comparison',
-            'status': 'error',
-            'error_message': str(e),
-            'error_type': type(e).__name__
-        }
-        OUT_FILE.write_text(json.dumps(error_data))
-        logger.info(f"✓ Wrote error output to {OUT_FILE}")
+        # CRITICAL: Write error output for Flow execution using WorkflowIO
+        wf_io = WorkflowIO()
+        wf_io.write_error_output("comparison_results", e, "model_comparison")
         raise
 
 if __name__ == "__main__":

@@ -462,8 +462,22 @@ def main(args=None):
                 logger.info(f"Best Prophet configuration: {best_config} with MAE: {best_score:.2f}")
                 logger.info(f"Tagged best run ID: {best_run_id}")
         
-        # Write training summary for Flow execution
-        if args.training_summary:
+        # Write training summary - ALWAYS for Flow execution, optionally for standalone
+        if wf_io.is_workflow_job():
+            # Flow mode - MUST write output for contract compliance
+            summary = {
+                'timestamp': datetime.now().isoformat(),
+                'framework': 'prophet_neuralprophet',
+                'status': 'success',
+                'total_configs': len(all_configs),
+                'successful_configs': len([r for r in all_results.values() if r is not None]),
+                'best_config': best_config,
+                'best_mae': best_score if best_score != float('inf') else None,
+                'models_saved': list(all_results.keys())
+            }
+            wf_io.write_output("training_summary", summary)
+        elif args.training_summary:
+            # Standalone mode with explicit output path
             summary = write_training_summary(all_results, args.training_summary)
         
         logger.info("Prophet forecasting experiment completed successfully")
@@ -471,20 +485,9 @@ def main(args=None):
         
     except Exception as e:
         logger.error(f"Error in main execution: {e}")
-        # CRITICAL: Write error output for Flow execution
-        # This ensures sidecar uploader has a file even if script fails
-        workflow_output = Path("/workflow/outputs/training_summary")
-        if workflow_output.parent.exists():
-            error_data = {
-                'timestamp': datetime.now().isoformat(),
-                'framework': 'prophet_neuralprophet',
-                'status': 'error',
-                'error_message': str(e),
-                'error_type': type(e).__name__
-            }
-            import json
-            workflow_output.write_text(json.dumps(error_data))
-            logger.info(f"✓ Wrote error output to {workflow_output}")
+        # CRITICAL: Write error output for Flow execution using WorkflowIO
+        wf_io = WorkflowIO()
+        wf_io.write_error_output("training_summary", e, "prophet_neuralprophet")
         raise
 
 if __name__ == "__main__":
