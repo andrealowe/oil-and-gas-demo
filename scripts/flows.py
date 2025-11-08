@@ -17,7 +17,7 @@ Flow Structure:
 
 from flytekit import workflow, task
 from flytekit.types.file import FlyteFile
-from typing import Dict, Any, List
+from typing import Dict, Any, List, TypeVar
 from flytekitplugins.domino.task import DominoJobConfig, DominoJobTask
 
 @workflow
@@ -38,11 +38,11 @@ def oil_gas_automl_forecasting_workflow():
     # Step 1: Data preparation - generate synthetic data
     # This ensures data exists before training tasks execute
     data_prep_task = DominoJobTask(
-        name="Generate Oil & Gas Synthetic Data",
+        name="Refresh Data",
         domino_job_config=DominoJobConfig(
             Command="python scripts/oil_gas_data_generator.py"
         ),
-        outputs={"data_summary": FlyteFile},
+        outputs={"data_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -59,8 +59,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/autogluon_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -70,8 +70,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/prophet_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -81,8 +81,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/nixtla_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -92,8 +92,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/oil_gas_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -113,12 +113,12 @@ def oil_gas_automl_forecasting_workflow():
             Command="python src/models/model_comparison.py"
         ),
         inputs={
-            "autogluon_summary": FlyteFile,
-            "prophet_summary": FlyteFile, 
-            "nixtla_summary": FlyteFile,
-            "combined_summary": FlyteFile
+            "autogluon_summary": FlyteFile[TypeVar("json")],
+            "prophet_summary": FlyteFile[TypeVar("json")],
+            "nixtla_summary": FlyteFile[TypeVar("json")],
+            "combined_summary": FlyteFile[TypeVar("json")]
         },
-        outputs={"comparison_results": FlyteFile},
+        outputs={"comparison_results": FlyteFile[TypeVar("json")]},
         use_latest=True
     )
     
@@ -148,24 +148,24 @@ def oil_gas_production_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python scripts/oil_gas_data_generator.py"
         ),
-        outputs={"prepared_data": FlyteFile},
+        outputs={"prepared_data": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
-    
+
     # Forecasting task using champion model
     forecast_task = DominoJobTask(
-        name="Generate Production Forecasts", 
+        name="Generate Production Forecasts",
         domino_job_config=DominoJobConfig(
             Command="python src/api/oil_gas_model_api.py --mode=batch_forecast"
         ),
         inputs={
-            "input_data": FlyteFile
+            "input_data": FlyteFile[TypeVar("json")]
         },
-        outputs={"forecasts": FlyteFile},
+        outputs={"forecasts": FlyteFile[TypeVar("json")]},
         use_latest=True
     )
-    
+
     # Dashboard update task
     dashboard_update_task = DominoJobTask(
         name="Update Forecasting Dashboard",
@@ -173,7 +173,7 @@ def oil_gas_production_forecasting_workflow():
             Command="python scripts/forecasting_dashboard.py --mode=update"
         ),
         inputs={
-            "forecast_data": FlyteFile
+            "forecast_data": FlyteFile[TypeVar("json")]
         },
         use_latest=True
     )
@@ -201,11 +201,11 @@ def oil_gas_model_retraining_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/data/feature_engineering.py --validate"
         ),
-        outputs={"validation_results": FlyteFile},
+        outputs={"validation_results": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
-    
+
     # Champion model retraining
     retrain_task = DominoJobTask(
         name="Retrain Champion Model",
@@ -213,22 +213,22 @@ def oil_gas_model_retraining_workflow():
             Command="python src/models/model_evaluation_and_registry.py --retrain"
         ),
         inputs={
-            "validation_data": FlyteFile
+            "validation_data": FlyteFile[TypeVar("json")]
         },
-        outputs={"retrain_results": FlyteFile},
+        outputs={"retrain_results": FlyteFile[TypeVar("json")]},
         use_latest=True
     )
-    
+
     # Performance validation
     validation_task = DominoJobTask(
-        name="Validate Retrained Model Performance", 
+        name="Validate Retrained Model Performance",
         domino_job_config=DominoJobConfig(
             Command="python src/models/model_evaluation_and_registry.py --validate"
         ),
         inputs={
-            "retrain_data": FlyteFile
+            "retrain_data": FlyteFile[TypeVar("json")]
         },
-        outputs={"performance_results": FlyteFile},
+        outputs={"performance_results": FlyteFile[TypeVar("json")]},
         use_latest=True
     )
     
@@ -255,22 +255,22 @@ def oil_gas_model_monitoring_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/monitoring/data_drift_monitor.py"
         ),
-        outputs={"drift_report": FlyteFile},
+        outputs={"drift_report": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
-    
+
     # Model performance monitoring
     performance_monitoring_task = DominoJobTask(
         name="Monitor Model Performance",
         domino_job_config=DominoJobConfig(
             Command="python src/monitoring/model_performance_monitor.py"
         ),
-        outputs={"performance_report": FlyteFile},
+        outputs={"performance_report": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
-    
+
     # Alert generation
     alert_task = DominoJobTask(
         name="Generate Performance Alerts",
@@ -278,10 +278,10 @@ def oil_gas_model_monitoring_workflow():
             Command="python src/monitoring/alert_generator.py"
         ),
         inputs={
-            "drift_data": FlyteFile,
-            "performance_data": FlyteFile
+            "drift_data": FlyteFile[TypeVar("json")],
+            "performance_data": FlyteFile[TypeVar("json")]
         },
-        outputs={"alerts": FlyteFile},
+        outputs={"alerts": FlyteFile[TypeVar("json")]},
         use_latest=True
     )
     

@@ -23,6 +23,7 @@ import mlflow
 # Add project root to path
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths, ensure_directories
+from src.models.workflow_io import WorkflowIO
 
 # Set random seeds for reproducibility
 np.random.seed(42)
@@ -713,12 +714,19 @@ class OilGasDataGenerator:
             summary_path = self.directories['reports'] / 'data_generation_summary.json'
             with open(summary_path, 'w') as f:
                 json.dump(summary, f, indent=2, default=str)
-            
+
             mlflow.log_artifact(str(summary_path))
             saved_paths['summary'] = str(summary_path)
-            
+
+            # Write to workflow outputs if running in Domino Flow
+            wf_io = WorkflowIO()
+            if wf_io.is_workflow_job():
+                print("Writing workflow output for 'data_summary'...")
+                wf_io.write_output("data_summary", summary)
+                print("Workflow output written successfully")
+
             mlflow.set_tag("generation_status", "success")
-            
+
         return saved_paths
 
 def main():

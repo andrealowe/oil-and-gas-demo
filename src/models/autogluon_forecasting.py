@@ -27,6 +27,7 @@ sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths
 from src.models.forecasting_config import ForecastingConfig
 from src.models.ensure_data import ensure_data_exists
+from src.models.workflow_io import WorkflowIO
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -236,21 +237,29 @@ def write_training_summary(results, output_path):
             'best_mae': float('inf'),
             'models_saved': []
         }
-        
+
         # Find best configuration
         for config_name, result in results.items():
             if result is not None and result['metrics']['mae'] < summary['best_mae']:
                 summary['best_mae'] = result['metrics']['mae']
                 summary['best_config'] = config_name
-                
-        # Save summary
+
+        # Save summary to normal location
         import json
         with open(output_path, 'w') as f:
             json.dump(summary, f, indent=2)
-        
+
         logger.info(f"Training summary saved to: {output_path}")
+
+        # Write to workflow outputs if running in Domino Flow
+        wf_io = WorkflowIO()
+        if wf_io.is_workflow_job():
+            logger.info("Writing workflow output for 'training_summary'...")
+            wf_io.write_output("training_summary", summary)
+            logger.info("Workflow output written successfully")
+
         return summary
-        
+
     except Exception as e:
         logger.error(f"Error writing training summary: {e}")
         return None
@@ -263,6 +272,16 @@ def main(args=None):
             args = parse_arguments()
 
         logger.info("Starting AutoGluon forecasting experiment")
+
+        # Read workflow input if running in a Flow (establishes dependency)
+        wf_io = WorkflowIO()
+        if wf_io.is_workflow_job():
+            logger.info("Running in Domino Flow mode")
+            data_prep_input = wf_io.read_input("data_prep")
+            if data_prep_input:
+                logger.info(f"Received data_prep input: {data_prep_input.get('generation_date', 'N/A')}")
+            else:
+                logger.warning("No data_prep input found, proceeding anyway")
 
         # Ensure data exists (will generate if missing)
         # This is critical for Domino Flows where data may not persist between tasks
