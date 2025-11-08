@@ -24,21 +24,35 @@ from flytekitplugins.domino.task import DominoJobConfig, DominoJobTask
 def oil_gas_automl_forecasting_workflow():
     """
     Oil & Gas AutoML Forecasting Workflow
-    
-    Trains and compares multiple forecasting frameworks in parallel:
-    - AutoGluon TimeSeries (multiple presets)
-    - Prophet and NeuralProphet (multiple configurations)
-    - Nixtla NeuralForecast (multiple neural models)
-    - Combined LightGBM + ARIMA model
-    
-    Then compares all results and registers the best model.
-    
-    The use_latest=True flag ensures the latest dataset snapshot is mounted.
+
+    Steps:
+    1. Generate synthetic oil & gas data (if not exists)
+    2. Train multiple forecasting frameworks in parallel:
+       - AutoGluon TimeSeries (multiple presets)
+       - Prophet and NeuralProphet (multiple configurations)
+       - Nixtla NeuralForecast (multiple neural models)
+       - Combined LightGBM + ARIMA model
+    3. Compare all results and register the best model
     """
-    
-    # Training tasks - run in parallel
+
+    # Step 1: Data preparation - generate synthetic data
+    # This ensures data exists before training tasks execute
+    data_prep_task = DominoJobTask(
+        name="Generate Oil & Gas Synthetic Data",
+        domino_job_config=DominoJobConfig(
+            Command="python scripts/oil_gas_data_generator.py"
+        ),
+        outputs={"data_summary": FlyteFile},
+        use_latest=True,
+        cache=True
+    )
+
+    # Execute data preparation first
+    data_result = data_prep_task()
+
+    # Step 2: Training tasks - run in parallel (depend on data preparation)
     # Each task produces training summary and model artifacts as outputs
-    
+
     autogluon_task = DominoJobTask(
         name="Train AutoGluon TimeSeries Models",
         domino_job_config=DominoJobConfig(
@@ -313,21 +327,33 @@ if __name__ == "__main__":
     print()
     print("Available Workflows:")
     print("1. oil_gas_automl_forecasting_workflow - Main AutoML comparison")
-    print("2. oil_gas_production_forecasting_workflow - Production forecasting")  
+    print("   (Includes data generation step)")
+    print("2. oil_gas_production_forecasting_workflow - Production forecasting")
     print("3. oil_gas_model_retraining_workflow - Model retraining")
     print("4. oil_gas_model_monitoring_workflow - Performance monitoring")
     print("5. oil_gas_comprehensive_ml_pipeline - Complete ML lifecycle")
     print()
-    print("To execute in Domino:")
+    print("For Local Development/Testing:")
+    print("Run data generator first to create datasets:")
+    print("  python scripts/oil_gas_data_generator.py")
+    print()
+    print("Then run individual model training scripts:")
+    print("  python src/models/autogluon_forecasting.py")
+    print("  python src/models/prophet_forecasting.py")
+    print("  python src/models/nixtla_forecasting.py")
+    print("  python src/models/oil_gas_forecasting.py")
+    print()
+    print("To execute in Domino Flows:")
     print("1. Upload this file to your Domino project")
     print("2. Create a new Flow using the Domino UI")
     print("3. Select the desired workflow function")
     print("4. Configure compute environment and schedule")
     print()
     print("Key Features:")
+    print("- Automatic data generation before training")
     print("- Parallel execution of AutoML frameworks")
-    print("- Automatic model comparison and registration") 
+    print("- Automatic model comparison and registration")
     print("- Champion model deployment")
     print("- Continuous monitoring and retraining")
     print("- Integration with MLflow experiment tracking")
-    print("- Domino dataset and artifact management")
+    print("- Correct data path handling (/mnt/data/Oil-and-Gas-Demo/)")
