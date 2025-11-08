@@ -439,11 +439,12 @@ def main():
                     'champion_framework': None,
                     'champion_mae': None
                 }
-                # Write to workflow output if directory exists
-                workflow_output = Path("/workflow/outputs/comparison")
-                if workflow_output.parent.exists():
-                    workflow_output.write_text(json.dumps(error_result))
-                    logger.info(f"✓ Wrote error output to {workflow_output}")
+                # Write to workflow output (create directory if needed)
+                OUT_DIR = Path("/workflow/outputs")
+                OUT_DIR.mkdir(parents=True, exist_ok=True)
+                OUT_FILE = OUT_DIR / "comparison"
+                OUT_FILE.write_text(json.dumps(error_result))
+                logger.info(f"✓ Wrote error output to {OUT_FILE}")
                 return
 
             # Create results summary for workflow output
@@ -463,11 +464,12 @@ def main():
             logger.info(f"Champion Config: {comparison_data['champion_config']}")
             logger.info(f"Champion MAE: {comparison_data['champion_mae']:.4f}")
 
-            # Write to workflow output if directory exists
-            workflow_output = Path("/workflow/outputs/comparison")
-            if workflow_output.parent.exists():
-                workflow_output.write_text(json.dumps(results_summary))
-                logger.info(f"✓ Wrote workflow output to {workflow_output}")
+            # Write to workflow output (create directory if needed)
+            OUT_DIR = Path("/workflow/outputs")
+            OUT_DIR.mkdir(parents=True, exist_ok=True)
+            OUT_FILE = OUT_DIR / "comparison"
+            OUT_FILE.write_text(json.dumps(results_summary))
+            logger.info(f"✓ Wrote workflow output to {OUT_FILE}")
 
             return results_summary
 
@@ -556,17 +558,18 @@ def main():
         logger.error(f"Error in model comparison: {e}")
         # CRITICAL: Write error output for Flow execution
         # This ensures sidecar uploader has a file even if script fails
-        workflow_output = Path("/workflow/outputs/comparison")
-        if workflow_output.parent.exists():
-            error_data = {
-                'timestamp': datetime.now().isoformat(),
-                'framework': 'model_comparison',
-                'status': 'error',
-                'error_message': str(e),
-                'error_type': type(e).__name__
-            }
-            workflow_output.write_text(json.dumps(error_data))
-            logger.info(f"✓ Wrote error output to {workflow_output}")
+        OUT_DIR = Path("/workflow/outputs")
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        OUT_FILE = OUT_DIR / "comparison"
+        error_data = {
+            'timestamp': datetime.now().isoformat(),
+            'framework': 'model_comparison',
+            'status': 'error',
+            'error_message': str(e),
+            'error_type': type(e).__name__
+        }
+        OUT_FILE.write_text(json.dumps(error_data))
+        logger.info(f"✓ Wrote error output to {OUT_FILE}")
         raise
 
 if __name__ == "__main__":
