@@ -125,19 +125,29 @@ class ForecastingConfig:
                 'n_forecasts': 1,
                 'epochs': 100,
                 'learning_rate': 0.1,
-                'batch_size': 32
+                'batch_size': 32,
+                'trainer_config': {
+                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts, not /mnt/code
+                    'enable_checkpointing': False,  # Disable checkpoints to keep artifacts clean
+                    'logger': False  # Disable Lightning's default logger since we use MLflow
+                }
             }
         },
         {
             'name': 'neuralprophet_autoregressive',
-            'model_type': 'neuralprophet', 
+            'model_type': 'neuralprophet',
             'params': {
                 'growth': 'linear',
                 'n_forecasts': 1,
                 'n_lags': 14,  # 2 weeks of autoregressive terms
                 'epochs': 150,
                 'learning_rate': 0.05,
-                'batch_size': 64
+                'batch_size': 64,
+                'trainer_config': {
+                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts, not /mnt/code
+                    'enable_checkpointing': False,  # Disable checkpoints to keep artifacts clean
+                    'logger': False  # Disable Lightning's default logger since we use MLflow
+                }
             }
         }
     ]
@@ -152,18 +162,28 @@ class ForecastingConfig:
                 'max_steps': 200,
                 'learning_rate': 0.001,
                 'batch_size': 32,
-                'hidden_size': 64
+                'hidden_size': 64,
+                'trainer_kwargs': {
+                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'enable_checkpointing': False,
+                    'logger': False
+                }
             }
         },
         {
             'name': 'nbeats_medium',
-            'model_class': 'NBEATS', 
+            'model_class': 'NBEATS',
             'params': {
                 'input_size': 14,
                 'max_steps': 200,
                 'learning_rate': 0.001,
                 'batch_size': 32,
-                'stack_types': ['trend', 'seasonality']
+                'stack_types': ['trend', 'seasonality'],
+                'trainer_kwargs': {
+                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'enable_checkpointing': False,
+                    'logger': False
+                }
             }
         },
         {
@@ -174,7 +194,12 @@ class ForecastingConfig:
                 'max_steps': 200,
                 'learning_rate': 0.001,
                 'batch_size': 32,
-                'n_pool_kernel_size': [2, 2, 2]
+                'n_pool_kernel_size': [2, 2, 2],
+                'trainer_kwargs': {
+                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'enable_checkpointing': False,
+                    'logger': False
+                }
             }
         },
         {
@@ -186,7 +211,12 @@ class ForecastingConfig:
                 'learning_rate': 0.001,
                 'batch_size': 32,
                 'hidden_size': 64,
-                'num_layers': 2
+                'num_layers': 2,
+                'trainer_kwargs': {
+                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'enable_checkpointing': False,
+                    'logger': False
+                }
             }
         },
         {
@@ -197,7 +227,12 @@ class ForecastingConfig:
                 'max_steps': 100,  # Reduced for TFT complexity
                 'learning_rate': 0.001,
                 'batch_size': 16,
-                'hidden_size': 32
+                'hidden_size': 32,
+                'trainer_kwargs': {
+                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'enable_checkpointing': False,
+                    'logger': False
+                }
             }
         }
     ]

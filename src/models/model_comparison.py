@@ -343,28 +343,137 @@ def save_comparison_results(comparison_df, best_model, registration_result):
         logger.error(f"Error saving results: {e}")
         return None
 
+def compare_workflow_summaries(summaries):
+    """
+    Compare training summaries from workflow inputs
+
+    Args:
+        summaries: Dict of {framework_name: summary_data}
+
+    Returns:
+        Tuple of (best_summary, comparison_data)
+    """
+    logger.info("Comparing models from workflow input summaries")
+
+    valid_summaries = {}
+    for name, summary in summaries.items():
+        if summary and summary.get('status') != 'error' and summary.get('best_mae') is not None:
+            valid_summaries[name] = summary
+            logger.info(f"{name}: best_mae={summary.get('best_mae'):.4f}, config={summary.get('best_config')}")
+        else:
+            logger.warning(f"Skipping {name}: invalid or error summary")
+
+    if not valid_summaries:
+        logger.error("No valid summaries to compare")
+        return None, None
+
+    # Find overall best based on MAE
+    best_framework = min(valid_summaries.items(), key=lambda x: x[1]['best_mae'])
+    champion_name, champion_summary = best_framework
+
+    # Create comparison data
+    comparison_data = {
+        'champion_framework': champion_name,
+        'champion_config': champion_summary.get('best_config'),
+        'champion_mae': champion_summary.get('best_mae'),
+        'all_frameworks': {
+            name: {
+                'best_mae': s.get('best_mae'),
+                'best_config': s.get('best_config'),
+                'total_configs': s.get('total_configs', 0),
+                'successful_configs': s.get('successful_configs', 0)
+            }
+            for name, s in valid_summaries.items()
+        }
+    }
+
+    return champion_summary, comparison_data
+
 def main():
     """Main function to run model comparison"""
     try:
         logger.info("Starting model comparison for Oil & Gas forecasting experiment")
-        
+
+        # CRITICAL: Check if running in workflow mode and read inputs
+        wf_io = WorkflowIO()
+        if wf_io.is_workflow_job():
+            logger.info("Running in Domino Flow mode - reading workflow inputs")
+
+            # Read all training summaries from workflow inputs
+            autogluon_summary = wf_io.read_input("autogluon_summary")
+            prophet_summary = wf_io.read_input("prophet_summary")
+            nixtla_summary = wf_io.read_input("nixtla_summary")
+            combined_summary = wf_io.read_input("combined_summary")
+
+            summaries = {
+                'autogluon': autogluon_summary,
+                'prophet_neuralprophet': prophet_summary,
+                'nixtla_neuralforecast': nixtla_summary,
+                'combined_lightgbm_arima': combined_summary
+            }
+
+            logger.info("Loaded training summaries from workflow inputs")
+
+            # Compare summaries directly
+            champion_summary, comparison_data = compare_workflow_summaries(summaries)
+
+            if champion_summary is None:
+                logger.error("No valid models to compare")
+                # Still write an error output
+                error_result = {
+                    'timestamp': datetime.now().isoformat(),
+                    'status': 'error',
+                    'error': 'No valid models found for comparison',
+                    'champion_framework': None,
+                    'champion_mae': None
+                }
+                wf_io.write_output("comparison_results", error_result)
+                return
+
+            # Create results summary for workflow output
+            results_summary = {
+                'timestamp': datetime.now().isoformat(),
+                'status': 'success',
+                'champion_framework': comparison_data['champion_framework'],
+                'champion_config': comparison_data['champion_config'],
+                'champion_mae': comparison_data['champion_mae'],
+                'all_frameworks': comparison_data['all_frameworks'],
+                'total_frameworks_evaluated': len([s for s in summaries.values() if s and s.get('status') != 'error']),
+                'registration_status': 'skipped_in_workflow_mode'
+            }
+
+            logger.info("=== COMPARISON COMPLETE (Workflow Mode) ===")
+            logger.info(f"Champion Framework: {comparison_data['champion_framework']}")
+            logger.info(f"Champion Config: {comparison_data['champion_config']}")
+            logger.info(f"Champion MAE: {comparison_data['champion_mae']:.4f}")
+
+            # Write to workflow outputs
+            logger.info("Writing workflow output for 'comparison_results'...")
+            wf_io.write_output("comparison_results", results_summary)
+            logger.info("Workflow output written successfully")
+
+            return results_summary
+
+        # STANDALONE MODE: Use MLflow to get experiment runs
+        logger.info("Running in standalone mode - querying MLflow experiments")
+
         # Setup MLflow
         experiment_id = setup_mlflow()
         experiment_name = 'oil_gas_forecasting_models'
-        
+
         # Start comparison run
         with mlflow.start_run(run_name="model_comparison_and_selection") as comparison_run:
             mlflow.set_tag("comparison_type", "automl_forecasting")
             mlflow.set_tag("data_source", "oil_gas_production")
             mlflow.set_tag("selection_criteria", "lowest_mae")
-            
+
             # Get all experiment runs
             runs = get_experiment_runs(experiment_name)
-            
+
             if not runs:
                 logger.error("No runs found in experiment")
                 return
-            
+
             mlflow.log_param("total_runs_evaluated", len(runs))
             
             # Extract metrics from runs
@@ -415,7 +524,7 @@ def main():
                 mlflow.log_artifact(str(results_dir / 'model_comparison_results.csv'))
                 mlflow.log_artifact(str(results_dir / 'comparison_summary.json'))
             
-            logger.info("=== COMPARISON COMPLETE ===")
+            logger.info("=== COMPARISON COMPLETE (Standalone Mode) ===")
             logger.info(f"Champion Model: {overall_best['run_name']} ({overall_best['category']})")
             logger.info(f"Performance: MAE={overall_best['mae']:.4f}")
 
@@ -423,14 +532,6 @@ def main():
                 logger.info(f"Registered as: {registration_result['model_name']} v{registration_result['model_version']}")
             else:
                 logger.warning(f"Registration failed: {registration_result.get('error', 'Unknown error')}")
-
-            # CRITICAL: Write to workflow outputs if running in Domino Flow
-            # Tasks MUST write all declared outputs or they fail!
-            wf_io = WorkflowIO()
-            if wf_io.is_workflow_job():
-                logger.info("Writing workflow output for 'comparison_results'...")
-                wf_io.write_output("comparison_results", results_summary)
-                logger.info("Workflow output written successfully")
 
             return results_summary
             
