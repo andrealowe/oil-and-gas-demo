@@ -66,19 +66,27 @@ def ensure_data_exists(project_name: str = 'Oil-and-Gas-Demo', force_regenerate:
 
     try:
         # Generate data
-        generator = OilGasDataGenerator(project_name=project_name)
+        generator = OilGasDataGenerator(project_name)
 
         # Generate geospatial data
         logger.info("Generating geospatial facility data...")
-        geospatial_df = generator.generate_geospatial_data()
+        geospatial_df = generator.generate_geospatial_data(
+            n_wells=1500,
+            n_refineries=25,
+            n_facilities=200
+        )
 
         # Generate time series data
         logger.info("Generating time series data...")
-        timeseries_dict = generator.generate_all_timeseries(geospatial_df)
+        timeseries_dict = generator.generate_time_series_data(
+            geospatial_df,
+            start_date='2022-01-01',
+            end_date='2025-11-01'
+        )
 
         # Save all data
         logger.info("Saving generated data...")
-        saved_paths = generator.save_all_data(geospatial_df, timeseries_dict)
+        saved_paths = generator.save_datasets(geospatial_df, timeseries_dict)
 
         logger.info("Data generation completed successfully")
         logger.info(f"Generated files: {list(saved_paths.keys())}")
