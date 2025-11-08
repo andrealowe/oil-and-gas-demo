@@ -17,7 +17,7 @@ def explore_timeseries_data():
     
     # Get data paths
     paths = get_data_paths('Oil-and-Gas-Demo')
-    data_dir = Path('/mnt/artifacts/Oil-and-Gas-Demo')  # Data is already in artifacts
+    data_dir = paths['base_data_path']  # Use correct data path from config
     
     datasets = {
         'production': 'production_timeseries.parquet',

@@ -636,9 +636,10 @@ def main():
     
     # Initialize model trainer
     trainer = OilGasGeospatialModels(project_name="Oil-and-Gas-Demo")
-    
-    # Data path
-    data_path = "/mnt/artifacts/Oil-and-Gas-Demo/prepared_geospatial_data.parquet"
+
+    # Data path - use correct data directory from config
+    paths = get_data_paths("Oil-and-Gas-Demo")
+    data_path = paths['base_data_path'] / "prepared_geospatial_data.parquet"
     
     # Train all models
     results = trainer.train_all_models(data_path)

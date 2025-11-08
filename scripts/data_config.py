@@ -35,18 +35,10 @@ def get_data_paths(project_name: str) -> Dict[str, Union[Path, bool]]:
     
     if is_git_based:
         # Git-based project
-        # For Oil-and-Gas-Demo project, data is stored in /mnt/data/
-        if project_name == 'Oil-and-Gas-Demo' and Path('/mnt/data/Oil-and-Gas-Demo').exists():
-            base_data_path = Path('/mnt/data/Oil-and-Gas-Demo')
-        else:
-            # Check if /mnt/data is writable, otherwise use /mnt/artifacts/data
-            test_data_dir = Path('/mnt/data')
-            if test_data_dir.exists() and os.access(test_data_dir, os.W_OK):
-                datasets_dir = os.environ.get('DOMINO_DATASETS_DIR', f'/mnt/data')
-                base_data_path = Path(datasets_dir) / project_name
-            else:
-                # Fallback to artifacts directory for data storage
-                base_data_path = Path('/mnt/artifacts') / 'data' / project_name
+        # Data is ALWAYS stored in /mnt/data/{project_name}
+        # Artifacts (models, reports, etc.) go to /mnt/artifacts
+        datasets_dir = os.environ.get('DOMINO_DATASETS_DIR', '/mnt/data')
+        base_data_path = Path(datasets_dir) / project_name
         artifacts_path = Path('/mnt/artifacts')
     else:
         # DFS project

@@ -38,8 +38,13 @@ import seaborn as sns
 import joblib
 import json
 from pathlib import Path
+import sys
 import warnings
 warnings.filterwarnings('ignore')
+
+# Add scripts directory to path
+sys.path.insert(0, '/mnt/code')
+from scripts.data_config import get_data_paths
 
 # ML libraries
 from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
@@ -56,9 +61,10 @@ plt.rcParams['figure.figsize'] = (12, 8)
 
     # Add data loading section
     data_load_cell = nbf.v4.new_code_cell("""
-# Load data and models
-data_path = "/mnt/artifacts/Oil-and-Gas-Demo/prepared_geospatial_data.parquet"
-models_dir = Path("/mnt/artifacts/models")
+# Get correct paths
+paths = get_data_paths('Oil-and-Gas-Demo')
+data_path = paths['base_data_path'] / "prepared_geospatial_data.parquet"
+models_dir = paths['artifacts_path'] / "models"
 
 # Load geospatial data
 df = pd.read_parquet(data_path)
