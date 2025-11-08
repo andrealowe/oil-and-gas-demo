@@ -140,13 +140,14 @@ def oil_gas_automl_forecasting_workflow() -> ForecastingResults:
     )
 
     # Return structured results for artifact tracking
+    # Note: comparison_result is a tuple with (comparison_results, models_directory)
     return ForecastingResults(
         data_summary=data_result["data_summary"],
         autogluon_summary=autogluon_result["training_summary"],
         prophet_summary=prophet_result["training_summary"],
         nixtla_summary=nixtla_result["training_summary"],
         combined_summary=combined_result["training_summary"],
-        models_directory=comparison_result["models_directory"]
+        models_directory=comparison_result[1]  # Second element is models_directory
     )
 
 # Export the main workflow for Domino Flows
