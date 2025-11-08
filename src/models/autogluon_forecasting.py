@@ -396,11 +396,14 @@ def main(args=None):
                             # Store result for Flow output
                             all_results[config['name']] = result
                             
-                            # Log metrics
+                            # Log metrics with error handling for run state issues
                             metrics = result['metrics']
-                            mlflow.log_metric("mae", metrics['mae'])
-                            mlflow.log_metric("rmse", metrics['rmse'])
-                            mlflow.log_metric("mape", metrics['mape'])
+                            try:
+                                mlflow.log_metric("mae", metrics['mae'])
+                                mlflow.log_metric("rmse", metrics['rmse'])
+                                mlflow.log_metric("mape", metrics['mape'])
+                            except Exception as e:
+                                logger.warning(f"Could not log metrics for {config['name']}: {e}")
                             
                             # Log leaderboard if available
                             if result['leaderboard'] is not None:
@@ -438,31 +441,47 @@ def main(args=None):
                                 best_config = config['name']
                                 best_run_id = child_run.info.run_id
                             
-                            mlflow.set_tag("training_status", "success")
+                            # Set success tag with error handling
+                            try:
+                                mlflow.set_tag("training_status", "success")
+                            except Exception as e:
+                                logger.warning(f"Could not set success tag for {config['name']}: {e}")
                             
                         else:
                             all_results[config['name']] = None
-                            mlflow.set_tag("training_status", "failed")
+                            try:
+                                mlflow.set_tag("training_status", "failed")
+                            except Exception as e:
+                                logger.warning(f"Could not set failed tag for {config['name']}: {e}")
                             logger.warning(f"Failed to train {config['name']}")
                     
                     except Exception as e:
-                        mlflow.set_tag("training_status", "error")
-                        mlflow.log_param("error_message", str(e))
+                        try:
+                            mlflow.set_tag("training_status", "error")
+                            mlflow.log_param("error_message", str(e))
+                        except Exception as mlflow_error:
+                            logger.warning(f"Could not log error to MLflow for {config['name']}: {mlflow_error}")
                         logger.error(f"Error in child run {config['name']}: {e}")
             
             # Log best model information and tag the best run
             if best_config and best_run_id:
-                mlflow.log_param("best_config", best_config)
-                mlflow.log_metric("best_mae", best_score)
+                try:
+                    mlflow.log_param("best_config", best_config)
+                    mlflow.log_metric("best_mae", best_score)
+                except Exception as e:
+                    logger.warning(f"Could not log best model params: {e}")
                 
                 # Tag the best child run
-                client = mlflow.tracking.MlflowClient()
-                best_tags = ForecastingConfig.get_mlflow_tags('autogluon', best_config, is_best=True)
-                for key, value in best_tags.items():
-                    client.set_tag(best_run_id, key, value)
+                try:
+                    client = mlflow.tracking.MlflowClient()
+                    best_tags = ForecastingConfig.get_mlflow_tags('autogluon', best_config, is_best=True)
+                    for key, value in best_tags.items():
+                        client.set_tag(best_run_id, key, value)
+                    logger.info(f"Tagged best run ID: {best_run_id}")
+                except Exception as e:
+                    logger.warning(f"Could not tag best run: {e}")
                 
                 logger.info(f"Best AutoGluon configuration: {best_config} with MAE: {best_score:.2f}")
-                logger.info(f"Tagged best run ID: {best_run_id}")
         
         # Write training summary - ALWAYS for Flow execution, optionally for standalone
         if wf_io.is_workflow_job():
