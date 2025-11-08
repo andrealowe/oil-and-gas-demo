@@ -2,71 +2,48 @@
 """
 Domino Flows Configuration for Oil & Gas AutoML Forecasting Pipeline
 
-This flow orchestrates the execution of multiple AutoML forecasting models in parallel,
-followed by model comparison and champion selection.
-
-Designed for read-only Domino Datasets where data is pre-loaded.
+This workflow trains multiple forecasting models in parallel and compares results.
+Follows Domino Flows best practices with simplified structure.
 """
 
 from flytekit import workflow, task
 from flytekit.types.file import FlyteFile
-from flytekit.types.directory import FlyteDirectory
-from typing import Dict, Any, List, TypeVar, NamedTuple
+from typing import Dict, Any
 from flytekitplugins.domino.task import DominoJobConfig, DominoJobTask
 
-# Define structured outputs for the workflow
-class ForecastingResults(NamedTuple):
-    data_summary: FlyteFile[TypeVar("json")]
-    autogluon_summary: FlyteFile[TypeVar("json")]
-    prophet_summary: FlyteFile[TypeVar("json")]
-    nixtla_summary: FlyteFile[TypeVar("json")]
-    combined_summary: FlyteFile[TypeVar("json")]
-    models_directory: FlyteDirectory
 
 @workflow
-def oil_gas_automl_forecasting_workflow() -> ForecastingResults:
+def oil_gas_automl_forecasting_workflow():
     """
     Oil & Gas AutoML Forecasting Workflow
 
-    Steps:
-    1. Check data quality and availability (read-only safe)
-    2. Train multiple forecasting frameworks in parallel:
-       - AutoGluon TimeSeries (multiple presets)
-       - Prophet and NeuralProphet (multiple configurations)
-       - Nixtla NeuralForecast (multiple neural models)
-       - Combined LightGBM + ARIMA model
-    3. Compare all results and register the best model
-    
-    Note: This workflow assumes data is pre-loaded via Domino Dataset
+    Trains four forecasting frameworks in parallel and compares their results.
+    The use_latest=True flag ensures the latest dataset snapshot is mounted.
     """
 
     # Step 1: Data quality check
-    # Verifies that required data files are accessible (read-only safe)
-    # This task only checks data availability without attempting to write
-    data_prep_task = DominoJobTask(
-        name="Check Data Quality", 
+    data_check_task = DominoJobTask(
+        name="Check Data Quality",
         domino_job_config=DominoJobConfig(
             Command="python scripts/oil_gas_data_generator.py"
         ),
-        outputs={"data_summary": FlyteFile[TypeVar("json")]},
+        outputs={"data_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
 
-    # Execute data preparation first
-    data_result = data_prep_task()
+    # Execute data check first
+    data_result = data_check_task()
 
-    # Step 2: Training tasks - run in parallel (depend on data preparation)
-    # Each task produces training summary and model artifacts as outputs
-    # All tasks have data_prep dependency to ensure data exists before training
-
+    # Step 2: Training tasks - run in parallel
+    # Each task produces a training summary file as output
     autogluon_task = DominoJobTask(
         name="Train AutoGluon TimeSeries Models",
         domino_job_config=DominoJobConfig(
             Command="python src/models/autogluon_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
@@ -76,8 +53,8 @@ def oil_gas_automl_forecasting_workflow() -> ForecastingResults:
         domino_job_config=DominoJobConfig(
             Command="python src/models/prophet_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
@@ -87,79 +64,63 @@ def oil_gas_automl_forecasting_workflow() -> ForecastingResults:
         domino_job_config=DominoJobConfig(
             Command="python src/models/nixtla_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
 
-    combined_model_task = DominoJobTask(
+    combined_task = DominoJobTask(
         name="Train Combined LightGBM + ARIMA Model",
         domino_job_config=DominoJobConfig(
             Command="python src/models/oil_gas_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
 
-    # Execute all training tasks in parallel - they all depend on data_result
-    # This ensures data generation completes before any training task starts
+    # Execute training tasks in parallel - they all depend on data_result
     autogluon_result = autogluon_task(data_prep=data_result["data_summary"])
     prophet_result = prophet_task(data_prep=data_result["data_summary"])
     nixtla_result = nixtla_task(data_prep=data_result["data_summary"])
-    combined_result = combined_model_task(data_prep=data_result["data_summary"])
+    combined_result = combined_task(data_prep=data_result["data_summary"])
 
-    # Model comparison task - has inputs that depend on all training task outputs
+    # Compare task - has inputs that depend on training task outputs
     # This creates the sequential dependency after parallel training
-    comparison_task = DominoJobTask(
+    compare_task = DominoJobTask(
         name="Compare Models and Register Champion",
         domino_job_config=DominoJobConfig(
             Command="python src/models/model_comparison.py"
         ),
         inputs={
-            "autogluon_summary": FlyteFile[TypeVar("json")],
-            "prophet_summary": FlyteFile[TypeVar("json")],
-            "nixtla_summary": FlyteFile[TypeVar("json")],
-            "combined_summary": FlyteFile[TypeVar("json")]
-        },
-        outputs={
-            "comparison_results": FlyteFile[TypeVar("json")],
-            "models_directory": FlyteDirectory
+            "autogluon_summary": FlyteFile,
+            "prophet_summary": FlyteFile,
+            "nixtla_summary": FlyteFile,
+            "combined_summary": FlyteFile
         },
         use_latest=True
     )
 
     # Execute comparison - depends on all training outputs
-    comparison_result = comparison_task(
+    comparison = compare_task(
         autogluon_summary=autogluon_result["training_summary"],
         prophet_summary=prophet_result["training_summary"],
         nixtla_summary=nixtla_result["training_summary"],
         combined_summary=combined_result["training_summary"]
     )
 
-    # Return structured results for artifact tracking
-    # Note: comparison_result is a tuple with (comparison_results, models_directory)
-    return ForecastingResults(
-        data_summary=data_result["data_summary"],
-        autogluon_summary=autogluon_result["training_summary"],
-        prophet_summary=prophet_result["training_summary"],
-        nixtla_summary=nixtla_result["training_summary"],
-        combined_summary=combined_result["training_summary"],
-        models_directory=comparison_result[1]  # Second element is models_directory
-    )
+    return comparison
+
 
 # Export the main workflow for Domino Flows
 if __name__ == "__main__":
-    # This script can be executed to register the workflow with Domino
     print("Domino Flows for Oil & Gas AutoML Forecasting Pipeline")
     print("=" * 60)
     print()
     print("Workflow: oil_gas_automl_forecasting_workflow")
-    print("- Data quality check (read-only safe)")
-    print("- Parallel execution of AutoML frameworks")
-    print("- Automatic model comparison and registration")
+    print("- Data quality check")
+    print("- Parallel training of AutoML frameworks")
+    print("- Model comparison and champion selection")
     print("- Compatible with read-only Domino Datasets")
-    print()
-    print("Note: This workflow assumes data is pre-loaded via Domino Dataset")
