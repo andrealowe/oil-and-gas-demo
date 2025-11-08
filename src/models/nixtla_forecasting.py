@@ -26,7 +26,7 @@ warnings.filterwarnings('ignore')
 # Add scripts directory to path for data_config import
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths
-from src.models.ensure_data import ensure_data_exists
+# Removed ensure_data import - scripts now fail fast if data is missing
 from src.models.forecasting_config import ForecastingConfig, get_standard_configs
 from src.models.workflow_io import WorkflowIO
 
@@ -60,6 +60,27 @@ def load_and_prepare_data():
         # Get data paths
         paths = get_data_paths('Oil-and-Gas-Demo')
         data_path = paths['base_data_path'] / 'production_timeseries.parquet'
+
+        # Check if data file exists - fail fast if missing
+        if not data_path.exists():
+            available_files = list(paths['base_data_path'].glob('*.parquet')) if paths['base_data_path'].exists() else []
+            error_msg = f"""
+🚫 REQUIRED DATA FILE MISSING: {data_path.name}
+
+Expected location: {data_path}
+Data directory: {paths['base_data_path']}
+Directory exists: {paths['base_data_path'].exists()}
+Available files: {[f.name for f in available_files]}
+
+🔧 SOLUTIONS:
+- For local development: Run 'python scripts/oil_gas_data_generator.py' first
+- For Domino Flows: Ensure the data generation task completed successfully
+- For read-only datasets: Verify data was pre-generated and mounted correctly
+
+❌ This script will NOT auto-generate missing data (fail-fast design)
+            """
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
         
         logger.info(f"Loading data from: {data_path}")
         df = pd.read_parquet(data_path)
@@ -392,10 +413,9 @@ def main(args=None):
 
         logger.info("Starting Nixtla NeuralForecast experiment")
 
-        # Ensure data exists (will generate if missing)
-        logger.info("Checking data availability...")
-        ensure_data_exists('Oil-and-Gas-Demo')
-        logger.info("Data check complete")
+        # Data must be available from previous flow task
+        # Script will fail fast with descriptive error if data is missing
+        logger.info("Loading pre-generated data from previous flow task...")
 
         # Setup
         experiment_id = setup_mlflow()

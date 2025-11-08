@@ -30,7 +30,7 @@ import logging
 # Add scripts directory to path for data_config import
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths, ensure_directories
-from src.models.ensure_data import ensure_data_exists
+# Removed ensure_data import - scripts now fail fast if data is missing
 from src.models.workflow_io import WorkflowIO
 
 # Time series libraries
@@ -93,21 +93,53 @@ class OilGasTimeSeriesForecaster:
         
         self.data = {}
         
-        # Production data
+        # Production data - REQUIRED
         production_path = self.data_dir / 'production_timeseries.parquet'
-        if production_path.exists():
-            df_prod = pd.read_parquet(production_path)
-            df_prod['date'] = pd.to_datetime(df_prod['date'])
-            self.data['production'] = df_prod
-            logger.info(f"Loaded production data: {df_prod.shape}")
+        if not production_path.exists():
+            available_files = list(self.data_dir.glob('*.parquet')) if self.data_dir.exists() else []
+            error_msg = f"""
+🚫 REQUIRED DATA FILE MISSING: {production_path.name}
+
+Expected location: {production_path}
+Data directory: {self.data_dir}
+Directory exists: {self.data_dir.exists()}
+Available files: {[f.name for f in available_files]}
+
+🔧 SOLUTIONS:
+- For local development: Run 'python scripts/oil_gas_data_generator.py' first
+- For Domino Flows: Ensure the data generation task completed successfully
+- For read-only datasets: Verify data was pre-generated and mounted correctly
+
+❌ This script will NOT auto-generate missing data (fail-fast design)
+            """
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+            
+        df_prod = pd.read_parquet(production_path)
+        df_prod['date'] = pd.to_datetime(df_prod['date'])
+        self.data['production'] = df_prod
+        logger.info(f"Loaded production data: {df_prod.shape}")
         
-        # Prices data
+        # Prices data - REQUIRED
         prices_path = self.data_dir / 'prices_timeseries.parquet'
-        if prices_path.exists():
-            df_prices = pd.read_parquet(prices_path)
-            df_prices['date'] = pd.to_datetime(df_prices['date'])
-            self.data['prices'] = df_prices
-            logger.info(f"Loaded prices data: {df_prices.shape}")
+        if not prices_path.exists():
+            available_files = list(self.data_dir.glob('*.parquet')) if self.data_dir.exists() else []
+            error_msg = f"""
+🚫 REQUIRED DATA FILE MISSING: {prices_path.name}
+
+Expected location: {prices_path}
+Data directory: {self.data_dir}
+Available files: {[f.name for f in available_files]}
+
+❌ This script requires prices data for forecasting
+            """
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+            
+        df_prices = pd.read_parquet(prices_path)
+        df_prices['date'] = pd.to_datetime(df_prices['date'])
+        self.data['prices'] = df_prices
+        logger.info(f"Loaded prices data: {df_prices.shape}")
         
         # Demand data
         demand_path = self.data_dir / 'demand_timeseries.parquet'
@@ -800,10 +832,9 @@ def write_training_summary(result):
 def main():
     """Main execution function"""
     try:
-        # Ensure data exists (will generate if missing)
-        print("Checking data availability...")
-        ensure_data_exists('Oil-and-Gas-Demo')
-        print("Data check complete")
+        # Data must be available from previous flow task
+        # Script will fail fast with descriptive error if data is missing
+        print("Loading pre-generated data from previous flow task...")
 
         forecaster = OilGasTimeSeriesForecaster()
         result = forecaster.run_complete_forecasting_pipeline()

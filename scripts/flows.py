@@ -35,10 +35,11 @@ def oil_gas_automl_forecasting_workflow():
     3. Compare all results and register the best model
     """
 
-    # Step 1: Data preparation - generate synthetic data
-    # This ensures data exists before training tasks execute
+    # Step 1: Data generation
+    # Generates synthetic oil & gas data for the forecasting pipeline
+    # This task creates all required datasets that subsequent tasks will use
     data_prep_task = DominoJobTask(
-        name="Refresh Data",
+        name="Generate Oil & Gas Data",
         domino_job_config=DominoJobConfig(
             Command="python scripts/oil_gas_data_generator.py"
         ),

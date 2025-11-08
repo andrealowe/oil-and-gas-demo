@@ -728,8 +728,109 @@ class OilGasDataGenerator:
 
         return saved_paths
 
+def check_data_availability_for_flow():
+    """
+    Check data availability for Domino Flows (read-only mode).
+
+    This function verifies that required data files exist and are accessible.
+    It does NOT attempt to write or generate new data.
+    """
+    try:
+        import argparse
+        from src.models.ensure_data import check_data_availability
+
+        print("🔍 Checking Data Availability for Flow")
+        print("=" * 50)
+
+        # Check data availability without generating
+        status = check_data_availability('Oil-and-Gas-Demo')
+
+        print(f"Data directory: {status['data_dir']}")
+        print(f"Directory exists: {status['data_dir_exists']}")
+        print()
+
+        # Check each required file
+        required_files = [
+            'production_timeseries.parquet',
+            'prices_timeseries.parquet',
+            'demand_timeseries.parquet',
+            'maintenance_timeseries.parquet'
+        ]
+
+        all_present = True
+        for filename in required_files:
+            file_info = status['files'].get(filename, {})
+            exists = file_info.get('exists', False)
+            size_mb = file_info.get('size_mb', 0)
+
+            status_icon = "✅" if exists else "❌"
+            print(f"{status_icon} {filename}: {'Found' if exists else 'MISSING'} ({size_mb} MB)")
+
+            if not exists:
+                all_present = False
+
+        print()
+
+        # Create summary for workflow output
+        summary = {
+            'timestamp': datetime.now().isoformat(),
+            'status': 'success' if all_present else 'error',
+            'data_dir': status['data_dir'],
+            'all_files_present': all_present,
+            'files_checked': len(required_files),
+            'files_found': sum(1 for f in required_files if status['files'].get(f, {}).get('exists', False)),
+            'total_size_mb': sum(status['files'].get(f, {}).get('size_mb', 0) for f in required_files),
+            'message': 'All required data files are accessible' if all_present else 'Some data files are missing'
+        }
+
+        print(f"Status: {summary['message']}")
+        print(f"Files: {summary['files_found']}/{summary['files_checked']} present")
+        print(f"Total size: {summary['total_size_mb']:.2f} MB")
+
+        # Write to workflow outputs
+        OUT_DIR = Path("/workflow/outputs")
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        OUT_FILE = OUT_DIR / "data_summary"
+        OUT_FILE.write_text(json.dumps(summary))
+        print(f"\n✓ Wrote workflow output to {OUT_FILE}")
+
+        if not all_present:
+            raise RuntimeError("Required data files are missing. Please ensure data is generated before running the flow.")
+
+        return summary
+
+    except Exception as e:
+        print(f"❌ Error checking data availability: {e}")
+        # Write error output
+        OUT_DIR = Path("/workflow/outputs")
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        OUT_FILE = OUT_DIR / "data_summary"
+        error_data = {
+            'timestamp': datetime.now().isoformat(),
+            'framework': 'data_check',
+            'status': 'error',
+            'error_message': str(e),
+            'error_type': type(e).__name__
+        }
+        OUT_FILE.write_text(json.dumps(error_data))
+        print(f"✓ Wrote error output to {OUT_FILE}")
+        raise
+
 def main():
     """Main function to generate oil and gas synthetic datasets"""
+    import argparse
+
+    # Parse arguments
+    parser = argparse.ArgumentParser(description='Oil & Gas Data Generator')
+    parser.add_argument('--check-only', action='store_true',
+                       help='Only check data availability (for Domino Flows - read-only mode)')
+    args = parser.parse_args()
+
+    # If check-only mode, just verify data exists
+    if args.check_only:
+        return check_data_availability_for_flow()
+
+    # Otherwise, run full data generation
     try:
         # Initialize generator
         generator = OilGasDataGenerator("Oil-and-Gas-Demo")
