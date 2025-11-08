@@ -31,6 +31,7 @@ import logging
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths, ensure_directories
 from src.models.ensure_data import ensure_data_exists
+from src.models.workflow_io import WorkflowIO
 
 # Time series libraries
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
@@ -761,6 +762,43 @@ class OilGasTimeSeriesForecaster:
             logger.error(f"Pipeline failed: {str(e)}")
             raise
 
+def write_training_summary(result):
+    """Write training summary for Flow execution"""
+    try:
+        summary = {
+            'timestamp': datetime.now().isoformat(),
+            'framework': 'combined_lightgbm_arima',
+            'total_configs': result.get('summary', {}).get('total_models_trained', 0),
+            'successful_configs': result.get('summary', {}).get('total_models_trained', 0),
+            'best_config': 'combined_ensemble',
+            'best_mae': None,  # This script doesn't track a single best MAE
+            'models_saved': [],
+            'model_categories': result.get('summary', {}).get('model_categories', {}),
+            'models_directory': result.get('models_directory', '')
+        }
+
+        # Save summary to models directory
+        models_dir = Path(result.get('models_directory', '/mnt/artifacts/models/forecasting'))
+        summary_path = models_dir / 'training_summary.json'
+        with open(summary_path, 'w') as f:
+            json.dump(summary, f, indent=2)
+
+        logger.info(f"Training summary saved to: {summary_path}")
+
+        # CRITICAL: Write to workflow outputs if running in Domino Flow
+        # Tasks MUST write all declared outputs or they fail!
+        wf_io = WorkflowIO()
+        if wf_io.is_workflow_job():
+            logger.info("Writing workflow output for 'training_summary'...")
+            wf_io.write_output("training_summary", summary)
+            logger.info("Workflow output written successfully")
+
+        return summary
+
+    except Exception as e:
+        logger.error(f"Error writing training summary: {e}")
+        return None
+
 def main():
     """Main execution function"""
     # Ensure data exists (will generate if missing)
@@ -770,6 +808,10 @@ def main():
 
     forecaster = OilGasTimeSeriesForecaster()
     result = forecaster.run_complete_forecasting_pipeline()
+
+    # Write training summary
+    summary = write_training_summary(result)
+
     print("Pipeline Result:")
     print(json.dumps(result, indent=2, default=str))
 

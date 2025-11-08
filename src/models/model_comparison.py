@@ -20,6 +20,7 @@ import json
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths
 from src.models.forecasting_config import ForecastingConfig
+from src.models.workflow_io import WorkflowIO
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -417,12 +418,20 @@ def main():
             logger.info("=== COMPARISON COMPLETE ===")
             logger.info(f"Champion Model: {overall_best['run_name']} ({overall_best['category']})")
             logger.info(f"Performance: MAE={overall_best['mae']:.4f}")
-            
+
             if registration_result['status'] == 'success':
                 logger.info(f"Registered as: {registration_result['model_name']} v{registration_result['model_version']}")
             else:
                 logger.warning(f"Registration failed: {registration_result.get('error', 'Unknown error')}")
-            
+
+            # CRITICAL: Write to workflow outputs if running in Domino Flow
+            # Tasks MUST write all declared outputs or they fail!
+            wf_io = WorkflowIO()
+            if wf_io.is_workflow_job():
+                logger.info("Writing workflow output for 'comparison_results'...")
+                wf_io.write_output("comparison_results", results_summary)
+                logger.info("Workflow output written successfully")
+
             return results_summary
             
     except Exception as e:

@@ -26,6 +26,7 @@ warnings.filterwarnings('ignore')
 sys.path.insert(0, '/mnt/code')
 from scripts.data_config import get_data_paths
 from src.models.ensure_data import ensure_data_exists
+from src.models.workflow_io import WorkflowIO
 from src.models.forecasting_config import ForecastingConfig, get_standard_configs
 
 # Configure logging
@@ -223,21 +224,30 @@ def write_training_summary(results, output_path):
             'best_mae': float('inf'),
             'models_saved': []
         }
-        
+
         # Find best configuration
         for config_name, result in results.items():
             if result is not None and result['metrics']['mae'] < summary['best_mae']:
                 summary['best_mae'] = result['metrics']['mae']
                 summary['best_config'] = config_name
-                
-        # Save summary
+
+        # Save summary to normal location
         import json
         with open(output_path, 'w') as f:
             json.dump(summary, f, indent=2)
-        
+
         logger.info(f"Training summary saved to: {output_path}")
+
+        # CRITICAL: Write to workflow outputs if running in Domino Flow
+        # Tasks MUST write all declared outputs or they fail!
+        wf_io = WorkflowIO()
+        if wf_io.is_workflow_job():
+            logger.info("Writing workflow output for 'training_summary'...")
+            wf_io.write_output("training_summary", summary)
+            logger.info("Workflow output written successfully")
+
         return summary
-        
+
     except Exception as e:
         logger.error(f"Error writing training summary: {e}")
         return None
