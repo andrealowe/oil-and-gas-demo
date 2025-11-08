@@ -13,7 +13,6 @@ Flow Structure:
    - Combined LightGBM+ARIMA
 2. Sequential model comparison and registration
 
-Based on /mnt/workflow.py for Domino Flow patterns.
 """
 
 from flytekit import workflow, task

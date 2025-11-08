@@ -72,7 +72,7 @@ class OilGasTimeSeriesForecaster:
         mlflow.set_experiment(self.experiment_name)
         
         # Data paths
-        self.data_dir = Path('/mnt/artifacts/Oil-and-Gas-Demo')
+        self.data_dir = self.paths['base_data_path']
         self.models_dir = self.directories['models'] / 'forecasting'
         self.models_dir.mkdir(parents=True, exist_ok=True)
         

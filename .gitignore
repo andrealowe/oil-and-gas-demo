@@ -214,3 +214,29 @@ CLAUDE.md
 
 # Development notes
 .development_notes.md
+
+# ML Model artifacts (should be in /mnt/artifacts, not /mnt/code)
+*.pkl
+*.h5
+*.pth
+*.joblib
+*.onnx
+*.pb
+*.model
+AutogluonModels/
+lightning_logs/
+mlruns/
+wandb/
+*.weights
+*.caffemodel
+
+# ML training artifacts
+*.csv.gz
+*_predictions.csv
+*_leaderboard.csv
+*_results.csv
+
+# TensorBoard logs
+runs/
+logs/
+tensorboard/

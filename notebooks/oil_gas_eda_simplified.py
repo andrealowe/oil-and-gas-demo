@@ -31,25 +31,28 @@ from scripts.data_config import get_data_paths
 # Set up MLflow
 mlflow.set_tracking_uri("http://localhost:8768")
 
-def setup_environment(project_name='oil_gas_dashboards'):
+def setup_environment(project_name='Oil-and-Gas-Demo'):
     """Setup directory structure and data paths"""
     paths = get_data_paths(project_name)
-    
+
     # Create necessary directories
     viz_dir = paths['artifacts_path'] / "visualizations" / "geospatial"
     analysis_dir = paths['artifacts_path'] / "analysis" / "geospatial"
-    
+
     for directory in [viz_dir, analysis_dir]:
         directory.mkdir(parents=True, exist_ok=True)
-    
+
     return paths, viz_dir, analysis_dir
 
-def load_and_prepare_data():
+def load_and_prepare_data(project_name='Oil-and-Gas-Demo'):
     """Load and prepare the oil & gas geospatial dataset"""
     print("Loading oil & gas geospatial dataset...")
-    
+
+    # Get correct data path
+    paths = get_data_paths(project_name)
+
     # Load the dataset
-    df = pd.read_parquet('/mnt/artifacts/data/oil_gas_dashboards/geospatial_facilities.parquet')
+    df = pd.read_parquet(paths['base_data_path'] / 'geospatial_facilities.parquet')
     
     print(f"Dataset loaded: {df.shape[0]} facilities, {df.shape[1]} features")
     

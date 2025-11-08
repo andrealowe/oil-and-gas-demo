@@ -15,7 +15,7 @@ This project contains comprehensive synthetic datasets designed for oil and gas 
 ## Dataset Structure
 
 ### 1. Geospatial Facilities Dataset
-**File**: `/mnt/artifacts/data/oil_gas_dashboards/geospatial_facilities.parquet`
+**File**: `/mnt/data/Oil-and-Gas-Demo/geospatial_facilities.parquet`
 
 Contains location and operational data for oil and gas facilities worldwide.
 
@@ -41,7 +41,7 @@ Contains location and operational data for oil and gas facilities worldwide.
 - Countries: 36
 
 ### 2. Production Time Series Dataset
-**File**: `/mnt/artifacts/data/oil_gas_dashboards/production_timeseries.parquet`
+**File**: `/mnt/data/Oil-and-Gas-Demo/production_timeseries.parquet`
 
 Daily production data for all oil wells from 2022-2024.
 
@@ -62,7 +62,7 @@ Daily production data for all oil wells from 2022-2024.
 - Production variability includes seasonal factors, equipment degradation, and maintenance impacts
 
 ### 3. Price Time Series Dataset
-**File**: `/mnt/artifacts/data/oil_gas_dashboards/prices_timeseries.parquet`
+**File**: `/mnt/data/Oil-and-Gas-Demo/prices_timeseries.parquet`
 
 Daily commodity prices for crude oil, natural gas, and refined products.
 
@@ -82,7 +82,7 @@ Daily commodity prices for crude oil, natural gas, and refined products.
 - Correlated product pricing relationships
 
 ### 4. Demand Forecasting Dataset
-**File**: `/mnt/artifacts/data/oil_gas_dashboards/demand_timeseries.parquet`
+**File**: `/mnt/data/Oil-and-Gas-Demo/demand_timeseries.parquet`
 
 Regional energy demand patterns and forecasting data.
 
@@ -102,7 +102,7 @@ Regional energy demand patterns and forecasting data.
 - Regional demand variations
 
 ### 5. Maintenance Schedule Dataset
-**File**: `/mnt/artifacts/data/oil_gas_dashboards/maintenance_timeseries.parquet`
+**File**: `/mnt/data/Oil-and-Gas-Demo/maintenance_timeseries.parquet`
 
 Equipment maintenance events and scheduling data.
 
@@ -122,7 +122,7 @@ Equipment maintenance events and scheduling data.
 - Priority-based planning
 
 ### 6. Weather Impact Dataset
-**File**: `/mnt/artifacts/data/oil_gas_dashboards/weather_timeseries.parquet`
+**File**: `/mnt/data/Oil-and-Gas-Demo/weather_timeseries.parquet`
 
 Regional weather conditions and operational impact assessment.
 
@@ -161,7 +161,7 @@ Regional weather conditions and operational impact assessment.
 ## Technical Implementation
 
 ### File Storage
-- **Data Location**: `/mnt/artifacts/data/oil_gas_dashboards/`
+- **Data Location**: `/mnt/data/Oil-and-Gas-Demo/`
 - **Format**: Apache Parquet for efficient columnar storage
 - **Size**: Optimized for dashboard query performance
 - **Compression**: Snappy compression enabled

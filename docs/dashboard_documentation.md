@@ -58,11 +58,11 @@ This documentation covers two comprehensive Streamlit dashboard applications des
 - **Charts:** Plotly visualizations with consistent styling
 
 ### Data Sources
-- **Facilities Data:** `/mnt/artifacts/Oil-and-Gas-Demo/geospatial_facilities.parquet`
-- **Production Data:** `/mnt/artifacts/Oil-and-Gas-Demo/production_timeseries.parquet`
-- **Price Data:** `/mnt/artifacts/Oil-and-Gas-Demo/prices_timeseries.parquet`
-- **Demand Data:** `/mnt/artifacts/Oil-and-Gas-Demo/demand_timeseries.parquet`
-- **Maintenance Data:** `/mnt/artifacts/Oil-and-Gas-Demo/maintenance_timeseries.parquet`
+- **Facilities Data:** `/mnt/data/Oil-and-Gas-Demo/geospatial_facilities.parquet`
+- **Production Data:** `/mnt/data/Oil-and-Gas-Demo/production_timeseries.parquet`
+- **Price Data:** `/mnt/data/Oil-and-Gas-Demo/prices_timeseries.parquet`
+- **Demand Data:** `/mnt/data/Oil-and-Gas-Demo/demand_timeseries.parquet`
+- **Maintenance Data:** `/mnt/data/Oil-and-Gas-Demo/maintenance_timeseries.parquet`
 
 ### API Integration
 - **Geospatial API:** `/mnt/code/src/api/domino_geospatial_endpoint.py`
@@ -98,7 +98,7 @@ streamlit run scripts/forecasting_dashboard.py --server.port=8502
 
 ### Environment Setup
 1. Ensure all requirements are installed: `pip install -r requirements.txt`
-2. Verify data access to `/mnt/artifacts/Oil-and-Gas-Demo/`
+2. Verify data access to `/mnt/data/Oil-and-Gas-Demo/`
 3. Check API endpoints are available (optional, fallback data provided)
 4. Run health checks using the launcher scripts
 
@@ -159,8 +159,8 @@ streamlit run scripts/forecasting_dashboard.py --server.port=8502
 
 #### Data Loading Problems
 **Issue:** "Unable to load facility data"
-**Solution:** 
-1. Check data directory permissions: `/mnt/artifacts/Oil-and-Gas-Demo/`
+**Solution:**
+1. Check data directory permissions: `/mnt/data/Oil-and-Gas-Demo/`
 2. Verify parquet files are accessible
 3. Clear cache and refresh: Sidebar > "Refresh Data"
 

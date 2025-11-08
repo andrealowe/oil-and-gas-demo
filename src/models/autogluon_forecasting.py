@@ -110,35 +110,46 @@ def calculate_metrics(y_true, y_pred):
         logger.error(f"Error calculating metrics: {e}")
         return {'mae': float('inf'), 'rmse': float('inf'), 'mape': float('inf')}
 
-def test_autogluon_config(data, train_end_date, config_name, preset, time_limit, hyperparameters=None):
+def test_autogluon_config(data, train_end_date, config_name, preset, time_limit, hyperparameters=None, models_dir=None):
     """Test specific AutoGluon configuration"""
     try:
         from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
-        
-        # Prepare train/test split  
+
+        # Prepare train/test split
         train_data = data[data['timestamp'] <= train_end_date].copy()
         test_data = data[data['timestamp'] > train_end_date].copy()
-        
+
         if len(test_data) == 0:
             logger.warning(f"No test data available for {config_name}")
             return None
-        
+
         logger.info(f"Training {config_name}: Train size: {len(train_data)}, Test size: {len(test_data)}")
-        
+
         # Convert to AutoGluon TimeSeriesDataFrame
         train_ts = TimeSeriesDataFrame(train_data)
-        
+
+        # Set up model save path in /mnt/artifacts
+        if models_dir is None:
+            paths = get_data_paths('Oil-and-Gas-Demo')
+            models_dir = paths['artifacts_path'] / 'models' / 'autogluon'
+        else:
+            models_dir = Path(models_dir) / 'autogluon'
+
+        models_dir.mkdir(parents=True, exist_ok=True)
+        model_save_path = models_dir / f"ag_{config_name}"
+
         # Configure predictor
         predictor_kwargs = {
             'target': 'target',
             'prediction_length': len(test_data),
             'freq': 'D',
-            'eval_metric': 'MASE'
+            'eval_metric': 'MASE',
+            'path': str(model_save_path)  # Save to /mnt/artifacts
         }
-        
+
         if hyperparameters:
             predictor_kwargs['hyperparameters'] = hyperparameters
-        
+
         # Create and train predictor
         predictor = TimeSeriesPredictor(
             **predictor_kwargs
@@ -333,7 +344,8 @@ def main(args=None):
                             config_name=config['name'],
                             preset=config['preset'],
                             time_limit=config['time_limit'],
-                            hyperparameters=config['hyperparameters']
+                            hyperparameters=config['hyperparameters'],
+                            models_dir=models_dir
                         )
                         
                         if result is not None:

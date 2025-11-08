@@ -535,9 +535,10 @@ class ModelEvaluator:
 def main():
     """Main function"""
     evaluator = ModelEvaluator("Oil-and-Gas-Demo")
-    data_path = "/mnt/artifacts/Oil-and-Gas-Demo/prepared_geospatial_data.parquet"
-    
-    evaluation_results, registered_models = evaluator.run_complete_evaluation(data_path)
+    paths = get_data_paths("Oil-and-Gas-Demo")
+    data_path = paths['base_data_path'] / "prepared_geospatial_data.parquet"
+
+    evaluation_results, registered_models = evaluator.run_complete_evaluation(str(data_path))
     
     # Print registry information
     print("\nMLflow Model Registry Information:")
