@@ -246,7 +246,6 @@ def write_training_summary(results, output_path):
                 summary['best_config'] = config_name
 
         # Save summary to normal location
-        import json
         with open(output_path, 'w') as f:
             json.dump(summary, f, indent=2)
 

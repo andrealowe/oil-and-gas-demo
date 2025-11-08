@@ -721,7 +721,6 @@ class OilGasDataGenerator:
             # Write to workflow outputs if directory exists (Flow mode)
             workflow_output = Path("/workflow/outputs/data_summary")
             if workflow_output.parent.exists():
-                import json
                 workflow_output.write_text(json.dumps(summary))
                 print(f"✓ Wrote workflow output to {workflow_output}")
 
@@ -794,8 +793,6 @@ def main():
         # This ensures sidecar uploader has a file even if script fails
         workflow_output = Path("/workflow/outputs/data_summary")
         if workflow_output.parent.exists():
-            import json
-            from datetime import datetime
             error_data = {
                 'timestamp': datetime.now().isoformat(),
                 'framework': 'data_generation',

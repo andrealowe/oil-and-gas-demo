@@ -788,7 +788,6 @@ def write_training_summary(result):
         # Write to workflow outputs if directory exists (Flow mode)
         workflow_output = Path("/workflow/outputs/training_summary")
         if workflow_output.parent.exists():
-            import json
             workflow_output.write_text(json.dumps(summary))
             logger.info(f"✓ Wrote workflow output to {workflow_output}")
 
@@ -821,7 +820,6 @@ def main():
         # This ensures sidecar uploader has a file even if script fails
         workflow_output = Path("/workflow/outputs/training_summary")
         if workflow_output.parent.exists():
-            import json
             error_data = {
                 'timestamp': datetime.now().isoformat(),
                 'framework': 'combined_lightgbm_arima',
