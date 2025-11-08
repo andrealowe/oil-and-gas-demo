@@ -785,13 +785,12 @@ def write_training_summary(result):
 
         logger.info(f"Training summary saved to: {summary_path}")
 
-        # CRITICAL: Write to workflow outputs if running in Domino Flow
-        # Tasks MUST write all declared outputs or they fail!
-        wf_io = WorkflowIO()
-        if wf_io.is_workflow_job():
-            logger.info("Writing workflow output for 'training_summary'...")
-            wf_io.write_output("training_summary", summary)
-            logger.info("Workflow output written successfully")
+        # Write to workflow outputs if directory exists (Flow mode)
+        workflow_output = Path("/workflow/outputs/training_summary")
+        if workflow_output.parent.exists():
+            import json
+            workflow_output.write_text(json.dumps(summary))
+            logger.info(f"✓ Wrote workflow output to {workflow_output}")
 
         return summary
 
@@ -820,8 +819,18 @@ def main():
         logger.error(f"Error in main execution: {e}")
         # CRITICAL: Write error output for Flow execution
         # This ensures sidecar uploader has a file even if script fails
-        wf_io = WorkflowIO()
-        wf_io.write_error_output("training_summary", e, "combined_lightgbm_arima")
+        workflow_output = Path("/workflow/outputs/training_summary")
+        if workflow_output.parent.exists():
+            import json
+            error_data = {
+                'timestamp': datetime.now().isoformat(),
+                'framework': 'combined_lightgbm_arima',
+                'status': 'error',
+                'error_message': str(e),
+                'error_type': type(e).__name__
+            }
+            workflow_output.write_text(json.dumps(error_data))
+            logger.info(f"✓ Wrote error output to {workflow_output}")
         raise
 
 if __name__ == "__main__":

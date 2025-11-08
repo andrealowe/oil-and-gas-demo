@@ -17,7 +17,7 @@ Flow Structure:
 
 from flytekit import workflow, task
 from flytekit.types.file import FlyteFile
-from typing import Dict, Any, List, TypeVar
+from typing import Dict, Any, List
 from flytekitplugins.domino.task import DominoJobConfig, DominoJobTask
 
 @workflow
@@ -42,7 +42,7 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python scripts/oil_gas_data_generator.py"
         ),
-        outputs={"data_summary": FlyteFile[TypeVar("json")]},
+        outputs={"data_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
@@ -59,8 +59,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/autogluon_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
@@ -70,8 +70,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/prophet_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
@@ -81,8 +81,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/nixtla_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
@@ -92,8 +92,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/oil_gas_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile[TypeVar("json")]},
+        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile},
         use_latest=True,
         cache=True
     )
@@ -104,33 +104,32 @@ def oil_gas_automl_forecasting_workflow():
     prophet_result = prophet_task(data_prep=data_result["data_summary"])
     nixtla_result = nixtla_task(data_prep=data_result["data_summary"])
     combined_result = combined_model_task(data_prep=data_result["data_summary"])
-    
+
     # Model comparison task - has inputs that depend on all training task outputs
     # This creates the sequential dependency after parallel training
+    # NOTE: No outputs declared - comparison writes to /workflow/outputs but doesn't return
     comparison_task = DominoJobTask(
         name="Compare Models and Register Champion",
         domino_job_config=DominoJobConfig(
             Command="python src/models/model_comparison.py"
         ),
         inputs={
-            "autogluon_summary": FlyteFile[TypeVar("json")],
-            "prophet_summary": FlyteFile[TypeVar("json")],
-            "nixtla_summary": FlyteFile[TypeVar("json")],
-            "combined_summary": FlyteFile[TypeVar("json")]
+            "autogluon_summary": FlyteFile,
+            "prophet_summary": FlyteFile,
+            "nixtla_summary": FlyteFile,
+            "combined_summary": FlyteFile
         },
-        outputs={"comparison_results": FlyteFile[TypeVar("json")]},
         use_latest=True
     )
-    
+
     # Execute comparison - depends on all training outputs
-    comparison_result = comparison_task(
+    # Don't return result - just execute for side effects
+    comparison_task(
         autogluon_summary=autogluon_result["training_summary"],
         prophet_summary=prophet_result["training_summary"],
-        nixtla_summary=nixtla_result["training_summary"], 
+        nixtla_summary=nixtla_result["training_summary"],
         combined_summary=combined_result["training_summary"]
     )
-    
-    return comparison_result
 
 # Additional workflow for production forecasting using the champion model
 @workflow  

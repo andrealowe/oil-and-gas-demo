@@ -718,12 +718,12 @@ class OilGasDataGenerator:
             mlflow.log_artifact(str(summary_path))
             saved_paths['summary'] = str(summary_path)
 
-            # Write to workflow outputs if running in Domino Flow
-            wf_io = WorkflowIO()
-            if wf_io.is_workflow_job():
-                print("Writing workflow output for 'data_summary'...")
-                wf_io.write_output("data_summary", summary)
-                print("Workflow output written successfully")
+            # Write to workflow outputs if directory exists (Flow mode)
+            workflow_output = Path("/workflow/outputs/data_summary")
+            if workflow_output.parent.exists():
+                import json
+                workflow_output.write_text(json.dumps(summary))
+                print(f"✓ Wrote workflow output to {workflow_output}")
 
             mlflow.set_tag("generation_status", "success")
 
@@ -792,8 +792,19 @@ def main():
         print(f"❌ Error in data generation: {e}")
         # CRITICAL: Write error output for Flow execution
         # This ensures sidecar uploader has a file even if script fails
-        wf_io = WorkflowIO()
-        wf_io.write_error_output("data_summary", e, "data_generation")
+        workflow_output = Path("/workflow/outputs/data_summary")
+        if workflow_output.parent.exists():
+            import json
+            from datetime import datetime
+            error_data = {
+                'timestamp': datetime.now().isoformat(),
+                'framework': 'data_generation',
+                'status': 'error',
+                'error_message': str(e),
+                'error_type': type(e).__name__
+            }
+            workflow_output.write_text(json.dumps(error_data))
+            print(f"✓ Wrote error output to {workflow_output}")
         raise
 
 if __name__ == "__main__":

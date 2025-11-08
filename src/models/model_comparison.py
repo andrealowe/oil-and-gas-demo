@@ -389,21 +389,33 @@ def compare_workflow_summaries(summaries):
 
     return champion_summary, comparison_data
 
+def read_workflow_input(name: str):
+    """Read input from workflow, return as dict"""
+    p = Path(f"/workflow/inputs/{name}")
+    if not p.exists():
+        return None
+
+    content = p.read_text().strip()
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        logger.warning(f"Could not parse {name} as JSON")
+        return None
+
 def main():
     """Main function to run model comparison"""
     try:
         logger.info("Starting model comparison for Oil & Gas forecasting experiment")
 
-        # CRITICAL: Check if running in workflow mode and read inputs
-        wf_io = WorkflowIO()
-        if wf_io.is_workflow_job():
-            logger.info("Running in Domino Flow mode - reading workflow inputs")
+        # Check if running in workflow mode by checking for input files
+        autogluon_summary = read_workflow_input("autogluon_summary")
+        prophet_summary = read_workflow_input("prophet_summary")
+        nixtla_summary = read_workflow_input("nixtla_summary")
+        combined_summary = read_workflow_input("combined_summary")
 
-            # Read all training summaries from workflow inputs
-            autogluon_summary = wf_io.read_input("autogluon_summary")
-            prophet_summary = wf_io.read_input("prophet_summary")
-            nixtla_summary = wf_io.read_input("nixtla_summary")
-            combined_summary = wf_io.read_input("combined_summary")
+        # If any inputs exist, we're in workflow mode
+        if any([autogluon_summary, prophet_summary, nixtla_summary, combined_summary]):
+            logger.info("Running in Domino Flow mode - using workflow inputs")
 
             summaries = {
                 'autogluon': autogluon_summary,
@@ -419,7 +431,7 @@ def main():
 
             if champion_summary is None:
                 logger.error("No valid models to compare")
-                # Still write an error output
+                # Still write an output
                 error_result = {
                     'timestamp': datetime.now().isoformat(),
                     'status': 'error',
@@ -427,7 +439,11 @@ def main():
                     'champion_framework': None,
                     'champion_mae': None
                 }
-                wf_io.write_output("comparison_results", error_result)
+                # Write to workflow output if directory exists
+                workflow_output = Path("/workflow/outputs/comparison")
+                if workflow_output.parent.exists():
+                    workflow_output.write_text(json.dumps(error_result))
+                    logger.info(f"✓ Wrote error output to {workflow_output}")
                 return
 
             # Create results summary for workflow output
@@ -447,10 +463,11 @@ def main():
             logger.info(f"Champion Config: {comparison_data['champion_config']}")
             logger.info(f"Champion MAE: {comparison_data['champion_mae']:.4f}")
 
-            # Write to workflow outputs
-            logger.info("Writing workflow output for 'comparison_results'...")
-            wf_io.write_output("comparison_results", results_summary)
-            logger.info("Workflow output written successfully")
+            # Write to workflow output if directory exists
+            workflow_output = Path("/workflow/outputs/comparison")
+            if workflow_output.parent.exists():
+                workflow_output.write_text(json.dumps(results_summary))
+                logger.info(f"✓ Wrote workflow output to {workflow_output}")
 
             return results_summary
 
@@ -539,8 +556,17 @@ def main():
         logger.error(f"Error in model comparison: {e}")
         # CRITICAL: Write error output for Flow execution
         # This ensures sidecar uploader has a file even if script fails
-        wf_io = WorkflowIO()
-        wf_io.write_error_output("comparison_results", e, "model_comparison")
+        workflow_output = Path("/workflow/outputs/comparison")
+        if workflow_output.parent.exists():
+            error_data = {
+                'timestamp': datetime.now().isoformat(),
+                'framework': 'model_comparison',
+                'status': 'error',
+                'error_message': str(e),
+                'error_type': type(e).__name__
+            }
+            workflow_output.write_text(json.dumps(error_data))
+            logger.info(f"✓ Wrote error output to {workflow_output}")
         raise
 
 if __name__ == "__main__":
