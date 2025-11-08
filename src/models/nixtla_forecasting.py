@@ -150,10 +150,11 @@ def create_neuralforecast_model(model_class, params, horizon):
             from neuralforecast.models import LSTM
             return LSTM(h=horizon, **params)
         elif model_class == 'TFT':
-            from neuralforecast.models import TFT
-            # TFT has different parameter requirements
-            tft_params = {k: v for k, v in params.items() if k in ['hidden_size', 'max_steps', 'learning_rate', 'batch_size']}
-            return TFT(h=horizon, **tft_params)
+            # TFT (Temporal Fusion Transformer) requires transformers library
+            # which has Keras 3 compatibility issues - skip for now
+            logger.warning(f"TFT model skipped due to TensorFlow/Keras compatibility issues")
+            logger.warning("Install tf-keras with: pip install tf-keras")
+            return None
         else:
             logger.error(f"Unknown model class: {model_class}")
             return None
@@ -443,19 +444,17 @@ def main(args=None):
             # Standalone mode - load from default location
             data = load_and_prepare_data()
         
-        # Get output paths - support both standalone and Flow modes
+        # Get output paths - use WorkflowIO for Flow compatibility
+        wf_io = WorkflowIO()
         if args.output_dir:
-            # Flow mode
+            # Flow mode - use specified output directory
             output_dir = Path(args.output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
             models_dir = output_dir / 'models'
+            models_dir.mkdir(parents=True, exist_ok=True)
         else:
-            # Standalone mode
-            paths = get_data_paths('Oil-and-Gas-Demo')
-            artifacts_dir = paths['artifacts_path']
-            models_dir = artifacts_dir / 'models'
-        
-        models_dir.mkdir(parents=True, exist_ok=True)
+            # Use WorkflowIO for automatic path detection
+            models_dir = wf_io.ensure_model_directory('nixtla')
         
         # Use standardized train/test split
         train_data, test_data, train_end_date = ForecastingConfig.get_train_test_split(data, 'ds')

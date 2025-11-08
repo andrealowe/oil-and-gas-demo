@@ -127,7 +127,7 @@ class ForecastingConfig:
                 'learning_rate': 0.1,
                 'batch_size': 32,
                 'trainer_config': {
-                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts, not /mnt/code
+                    'default_root_dir': '/tmp/lightning_logs',  # Use temp directory for logs (Flow-safe)
                     'enable_checkpointing': False,  # Disable checkpoints to keep artifacts clean
                     'logger': False  # Disable Lightning's default logger since we use MLflow
                 }
@@ -144,7 +144,7 @@ class ForecastingConfig:
                 'learning_rate': 0.05,
                 'batch_size': 64,
                 'trainer_config': {
-                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts, not /mnt/code
+                    'default_root_dir': '/tmp/lightning_logs',  # Use temp directory for logs (Flow-safe)
                     'enable_checkpointing': False,  # Disable checkpoints to keep artifacts clean
                     'logger': False  # Disable Lightning's default logger since we use MLflow
                 }
@@ -164,7 +164,7 @@ class ForecastingConfig:
                 'batch_size': 32,
                 'hidden_size': 64,
                 'trainer_kwargs': {
-                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'default_root_dir': '/tmp/lightning_logs',  # Use temp directory for logs (Flow-safe)
                     'enable_checkpointing': False,
                     'logger': False
                 }
@@ -180,7 +180,7 @@ class ForecastingConfig:
                 'batch_size': 32,
                 'stack_types': ['trend', 'seasonality'],
                 'trainer_kwargs': {
-                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'default_root_dir': '/tmp/lightning_logs',  # Use temp directory for logs (Flow-safe)
                     'enable_checkpointing': False,
                     'logger': False
                 }
@@ -196,7 +196,7 @@ class ForecastingConfig:
                 'batch_size': 32,
                 'n_pool_kernel_size': [2, 2, 2],
                 'trainer_kwargs': {
-                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'default_root_dir': '/tmp/lightning_logs',  # Use temp directory for logs (Flow-safe)
                     'enable_checkpointing': False,
                     'logger': False
                 }
@@ -213,28 +213,30 @@ class ForecastingConfig:
                 'hidden_size': 64,
                 'num_layers': 2,
                 'trainer_kwargs': {
-                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
+                    'default_root_dir': '/tmp/lightning_logs',  # Use temp directory for logs (Flow-safe)
                     'enable_checkpointing': False,
                     'logger': False
                 }
             }
         },
-        {
-            'name': 'tft_medium',
-            'model_class': 'TFT',
-            'params': {
-                'input_size': 14,
-                'max_steps': 100,  # Reduced for TFT complexity
-                'learning_rate': 0.001,
-                'batch_size': 16,
-                'hidden_size': 32,
-                'trainer_kwargs': {
-                    'default_root_dir': '/mnt/artifacts/lightning_logs',  # Store logs in artifacts
-                    'enable_checkpointing': False,
-                    'logger': False
-                }
-            }
-        }
+        # TFT model commented out due to TensorFlow/Keras compatibility issues
+        # Uncomment when transformers/tf-keras compatibility is resolved
+        # {
+        #     'name': 'tft_medium', 
+        #     'model_class': 'TFT',
+        #     'params': {
+        #         'input_size': 14,
+        #         'max_steps': 100,
+        #         'learning_rate': 0.001, 
+        #         'batch_size': 16,
+        #         'hidden_size': 32,
+        #         'trainer_kwargs': {
+        #             'default_root_dir': '/mnt/artifacts/lightning_logs',
+        #             'enable_checkpointing': False,
+        #             'logger': False
+        #         }
+        #     }
+        # }
     ]
     
     # Combined LightGBM + ARIMA standardized configuration

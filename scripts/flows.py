@@ -10,11 +10,21 @@ Designed for read-only Domino Datasets where data is pre-loaded.
 
 from flytekit import workflow, task
 from flytekit.types.file import FlyteFile
-from typing import Dict, Any, List
+from flytekit.types.directory import FlyteDirectory
+from typing import Dict, Any, List, TypeVar, NamedTuple
 from flytekitplugins.domino.task import DominoJobConfig, DominoJobTask
 
+# Define structured outputs for the workflow
+class ForecastingResults(NamedTuple):
+    data_summary: FlyteFile[TypeVar("json")]
+    autogluon_summary: FlyteFile[TypeVar("json")]
+    prophet_summary: FlyteFile[TypeVar("json")]
+    nixtla_summary: FlyteFile[TypeVar("json")]
+    combined_summary: FlyteFile[TypeVar("json")]
+    models_directory: FlyteDirectory
+
 @workflow
-def oil_gas_automl_forecasting_workflow():
+def oil_gas_automl_forecasting_workflow() -> ForecastingResults:
     """
     Oil & Gas AutoML Forecasting Workflow
 
@@ -38,7 +48,7 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python scripts/oil_gas_data_generator.py"
         ),
-        outputs={"data_summary": FlyteFile},
+        outputs={"data_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -55,8 +65,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/autogluon_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -66,8 +76,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/prophet_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -77,8 +87,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/nixtla_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -88,8 +98,8 @@ def oil_gas_automl_forecasting_workflow():
         domino_job_config=DominoJobConfig(
             Command="python src/models/oil_gas_forecasting.py"
         ),
-        inputs={"data_prep": FlyteFile},  # Explicit dependency on data generation
-        outputs={"training_summary": FlyteFile},
+        inputs={"data_prep": FlyteFile[TypeVar("json")]},  # Explicit dependency on data generation
+        outputs={"training_summary": FlyteFile[TypeVar("json")]},
         use_latest=True,
         cache=True
     )
@@ -109,21 +119,34 @@ def oil_gas_automl_forecasting_workflow():
             Command="python src/models/model_comparison.py"
         ),
         inputs={
-            "autogluon_summary": FlyteFile,
-            "prophet_summary": FlyteFile,
-            "nixtla_summary": FlyteFile,
-            "combined_summary": FlyteFile
+            "autogluon_summary": FlyteFile[TypeVar("json")],
+            "prophet_summary": FlyteFile[TypeVar("json")],
+            "nixtla_summary": FlyteFile[TypeVar("json")],
+            "combined_summary": FlyteFile[TypeVar("json")]
+        },
+        outputs={
+            "comparison_results": FlyteFile[TypeVar("json")],
+            "models_directory": FlyteDirectory
         },
         use_latest=True
     )
 
     # Execute comparison - depends on all training outputs
-    # Don't return result - just execute for side effects
-    comparison_task(
+    comparison_result = comparison_task(
         autogluon_summary=autogluon_result["training_summary"],
         prophet_summary=prophet_result["training_summary"],
         nixtla_summary=nixtla_result["training_summary"],
         combined_summary=combined_result["training_summary"]
+    )
+
+    # Return structured results for artifact tracking
+    return ForecastingResults(
+        data_summary=data_result["data_summary"],
+        autogluon_summary=autogluon_result["training_summary"],
+        prophet_summary=prophet_result["training_summary"],
+        nixtla_summary=nixtla_result["training_summary"],
+        combined_summary=combined_result["training_summary"],
+        models_directory=comparison_result["models_directory"]
     )
 
 # Export the main workflow for Domino Flows

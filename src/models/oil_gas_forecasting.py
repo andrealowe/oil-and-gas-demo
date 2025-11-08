@@ -809,8 +809,9 @@ def write_training_summary(result):
             'models_directory': result.get('models_directory', '')
         }
 
-        # Save summary to models directory
-        models_dir = Path(result.get('models_directory', '/mnt/artifacts/models/forecasting'))
+        # Save summary to models directory - use WorkflowIO for Flow compatibility
+        wf_io = WorkflowIO()
+        models_dir = wf_io.ensure_model_directory('forecasting')
         summary_path = models_dir / 'training_summary.json'
         with open(summary_path, 'w') as f:
             json.dump(summary, f, indent=2)

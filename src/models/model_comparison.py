@@ -442,9 +442,17 @@ def main():
                 # Write to workflow output (create directory if needed)
                 OUT_DIR = Path("/workflow/outputs")
                 OUT_DIR.mkdir(parents=True, exist_ok=True)
-                OUT_FILE = OUT_DIR / "comparison"
+                
+                # Write error results  
+                OUT_FILE = OUT_DIR / "comparison_results"
                 OUT_FILE.write_text(json.dumps(error_result))
                 logger.info(f"✓ Wrote error output to {OUT_FILE}")
+                
+                # Create empty models directory for Flow compatibility
+                MODELS_OUT_DIR = OUT_DIR / "models_directory"
+                MODELS_OUT_DIR.mkdir(parents=True, exist_ok=True)
+                placeholder = MODELS_OUT_DIR / "ERROR.txt"
+                placeholder.write_text("No models available due to comparison failure\n")
                 return
 
             # Create results summary for workflow output
@@ -467,9 +475,41 @@ def main():
             # Write to workflow output (create directory if needed)
             OUT_DIR = Path("/workflow/outputs")
             OUT_DIR.mkdir(parents=True, exist_ok=True)
-            OUT_FILE = OUT_DIR / "comparison"
+            
+            # Write comparison results
+            OUT_FILE = OUT_DIR / "comparison_results"
             OUT_FILE.write_text(json.dumps(results_summary))
-            logger.info(f"✓ Wrote workflow output to {OUT_FILE}")
+            logger.info(f"✓ Wrote comparison results to {OUT_FILE}")
+            
+            # Create models directory output for Flow artifacts
+            MODELS_OUT_DIR = OUT_DIR / "models_directory" 
+            MODELS_OUT_DIR.mkdir(parents=True, exist_ok=True)
+            
+            # Copy any existing models to the output directory
+            # This ensures models are available as Flow artifacts
+            try:
+                from src.models.workflow_io import WorkflowIO
+                wf_io = WorkflowIO()
+                source_models_dir = wf_io.get_model_save_path()
+                if source_models_dir.exists():
+                    import shutil
+                    for item in source_models_dir.rglob("*"):
+                        if item.is_file():
+                            relative_path = item.relative_to(source_models_dir)
+                            target_path = MODELS_OUT_DIR / relative_path
+                            target_path.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(item, target_path)
+                    logger.info(f"✓ Copied models to Flow output directory: {MODELS_OUT_DIR}")
+                else:
+                    # Create placeholder file to ensure directory exists
+                    placeholder = MODELS_OUT_DIR / "README.txt"
+                    placeholder.write_text("Models directory for Flow artifacts\n")
+                    logger.info(f"✓ Created models directory placeholder: {MODELS_OUT_DIR}")
+            except Exception as e:
+                logger.warning(f"Could not copy models to output directory: {e}")
+                # Create placeholder anyway
+                placeholder = MODELS_OUT_DIR / "README.txt"
+                placeholder.write_text("Models directory for Flow artifacts\n")
 
             return results_summary
 
@@ -560,7 +600,9 @@ def main():
         # This ensures sidecar uploader has a file even if script fails
         OUT_DIR = Path("/workflow/outputs")
         OUT_DIR.mkdir(parents=True, exist_ok=True)
-        OUT_FILE = OUT_DIR / "comparison"
+        
+        # Write error to comparison_results
+        OUT_FILE = OUT_DIR / "comparison_results"
         error_data = {
             'timestamp': datetime.now().isoformat(),
             'framework': 'model_comparison',
@@ -570,6 +612,12 @@ def main():
         }
         OUT_FILE.write_text(json.dumps(error_data))
         logger.info(f"✓ Wrote error output to {OUT_FILE}")
+        
+        # Create empty models directory for Flow compatibility
+        MODELS_OUT_DIR = OUT_DIR / "models_directory"
+        MODELS_OUT_DIR.mkdir(parents=True, exist_ok=True)
+        placeholder = MODELS_OUT_DIR / "FATAL_ERROR.txt"
+        placeholder.write_text(f"Script failed: {str(e)}\n")
         raise
 
 if __name__ == "__main__":

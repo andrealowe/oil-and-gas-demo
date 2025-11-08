@@ -198,6 +198,56 @@ class WorkflowIO:
         logger.error(f"Writing error output for '{name}': {error}")
         self.write_output(name, error_data)
 
+    def get_model_save_path(self, base_path: str = "/mnt/artifacts") -> Path:
+        """
+        Get appropriate model save path based on execution mode
+        
+        Args:
+            base_path: Default path for non-Flow execution
+            
+        Returns:
+            Path object for saving models
+        """
+        if self.is_workflow_job():
+            # In Domino Flows, models should be saved to workflow outputs
+            # They will be handled as artifacts by the Flow system
+            return self.WORKFLOW_OUTPUTS_DIR / "models"
+        else:
+            # Normal execution - use artifacts directory
+            return Path(base_path)
+            
+    def get_artifact_save_path(self, artifact_type: str = "models") -> Path:
+        """
+        Get appropriate artifact save path based on execution mode
+        
+        Args:
+            artifact_type: Type of artifact (models, reports, etc.)
+            
+        Returns:
+            Path object for saving artifacts
+        """
+        if self.is_workflow_job():
+            # In Domino Flows, save to workflow outputs
+            return self.WORKFLOW_OUTPUTS_DIR / artifact_type
+        else:
+            # Normal execution - use artifacts directory
+            return Path(f"/mnt/artifacts/{artifact_type}")
+
+    def ensure_model_directory(self, subdirectory: str = "models") -> Path:
+        """
+        Ensure model directory exists and return path
+        
+        Args:
+            subdirectory: Subdirectory within the model save path
+            
+        Returns:
+            Path to the model directory
+        """
+        base_path = self.get_model_save_path()
+        model_dir = base_path / subdirectory
+        model_dir.mkdir(parents=True, exist_ok=True)
+        return model_dir
+
 
 # Convenience functions for quick use
 def is_workflow_job() -> bool:

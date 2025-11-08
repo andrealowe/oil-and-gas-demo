@@ -309,19 +309,17 @@ def main(args=None):
             # Standalone mode - load from default location
             data = load_and_prepare_data()
         
-        # Get output paths - support both standalone and Flow modes
+        # Get output paths - use WorkflowIO for Flow compatibility
+        wf_io = WorkflowIO()
         if args.output_dir:
-            # Flow mode
+            # Flow mode - use specified output directory
             output_dir = Path(args.output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
             models_dir = output_dir / 'models'
+            models_dir.mkdir(parents=True, exist_ok=True)
         else:
-            # Standalone mode
-            paths = get_data_paths('Oil-and-Gas-Demo')
-            artifacts_dir = paths['artifacts_path']
-            models_dir = artifacts_dir / 'models'
-        
-        models_dir.mkdir(parents=True, exist_ok=True)
+            # Use WorkflowIO for automatic path detection
+            models_dir = wf_io.ensure_model_directory('prophet')
         
         # Use standardized train/test split
         train_data, test_data, train_end_date = ForecastingConfig.get_train_test_split(data, 'ds')

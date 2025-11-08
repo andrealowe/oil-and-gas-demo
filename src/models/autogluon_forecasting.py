@@ -152,14 +152,14 @@ def test_autogluon_config(data, train_end_date, config_name, preset, time_limit,
         # Convert to AutoGluon TimeSeriesDataFrame
         train_ts = TimeSeriesDataFrame(train_data)
 
-        # Set up model save path in /mnt/artifacts
+        # Set up model save path - use WorkflowIO for Flow compatibility
+        wf_io = WorkflowIO()
         if models_dir is None:
-            paths = get_data_paths('Oil-and-Gas-Demo')
-            models_dir = paths['artifacts_path'] / 'models' / 'autogluon'
+            models_dir = wf_io.ensure_model_directory('autogluon')
         else:
             models_dir = Path(models_dir) / 'autogluon'
+            models_dir.mkdir(parents=True, exist_ok=True)
 
-        models_dir.mkdir(parents=True, exist_ok=True)
         model_save_path = models_dir / f"ag_{config_name}"
 
         # Configure predictor
