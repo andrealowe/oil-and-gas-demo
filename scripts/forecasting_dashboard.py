@@ -43,6 +43,19 @@ if 'theme' not in st.session_state:
 # Professional MLOps Platform CSS with Light Mode Override
 st.markdown("""
 <style>
+    /* Hide Streamlit header and footer */
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+    
+    .viewerBadge_container__1QSob {
+        display: none !important;
+    }
+    
+    footer {
+        display: none !important;
+    }
+    
     /* Force light theme override - prevents dark mode */
     .stApp {
         background-color: #ffffff !important;
@@ -94,21 +107,23 @@ st.markdown("""
         }
     }
     
-    /* Professional MLOps color scheme */
+    /* Light Mode MLOps color scheme */
     :root {
-        --primary-blue: #1f2937;
-        --secondary-blue: #374151;
-        --accent-blue: #3b82f6;
-        --light-blue: #dbeafe;
-        --success-green: #059669;
-        --warning-amber: #d97706;
-        --error-red: #dc2626;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-600: #4b5563;
-        --gray-800: #1f2937;
-        --gray-900: #111827;
+        --primary-blue: #3b82f6;        /* Bright blue instead of dark */
+        --secondary-blue: #60a5fa;      /* Light blue instead of dark */
+        --accent-blue: #2563eb;         /* Medium blue for accents */
+        --light-blue: #dbeafe;          /* Keep light blue */
+        --success-green: #10b981;       /* Bright green */
+        --warning-amber: #f59e0b;       /* Bright amber */
+        --error-red: #ef4444;           /* Bright red */
+        --gray-50: #ffffff;             /* Pure white backgrounds */
+        --gray-100: #f8fafc;           /* Very light gray */
+        --gray-200: #e2e8f0;           /* Light gray borders */
+        --gray-600: #64748b;           /* Medium gray text */
+        --gray-800: #334155;           /* Dark gray (for text) */
+        --gray-900: #0f172a;           /* Very dark (for text) */
+        --text-primary: #0f172a;        /* Primary text color */
+        --text-secondary: #475569;      /* Secondary text color */
     }
     
     /* Main background - clean enterprise styling */
@@ -119,51 +134,104 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* Header styling - enterprise platform look */
-    .mlops-header {
-        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    /* Enterprise Header - Professional oil & gas company style */
+    .enterprise-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
         color: white;
-        padding: 1.5rem 2rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--gray-200);
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        padding: 2rem 2.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
     }
     
-    .mlops-header h1 {
+    .enterprise-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .header-left h1 {
         margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
+        font-size: 2rem;
+        font-weight: 700;
         color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
-    .mlops-header .subtitle {
-        margin-top: 0.5rem;
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 0.875rem;
+    .header-subtitle {
+        margin: 0.5rem 0 0 0;
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
         font-weight: 400;
+        letter-spacing: 0.025em;
+    }
+    
+    .header-stats {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .stat-label {
+        display: block;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-value {
+        display: block;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: white;
     }
     
     /* Forecast card styling - enterprise MLOps platform design */
     .forecast-card {
-        background: white;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         padding: 2rem 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        border: 1px solid var(--gray-200);
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid var(--primary-blue);
         margin-bottom: 1.5rem;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         min-height: 140px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.3s ease;
     }
     
     .forecast-card:hover {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border-color: var(--accent-blue);
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.08);
+        border-left-color: #1d4ed8;
     }
     
     .forecast-value {
@@ -249,21 +317,28 @@ st.markdown("""
     }
     
     .stTabs [data-baseweb="tab"] {
-        background: var(--gray-100);
-        border-radius: 8px 8px 0 0;
-        color: var(--gray-700);
-        font-weight: 500;
-        padding: 0.75rem 1.5rem;
-        border: 1px solid var(--gray-200);
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        border-radius: 10px 10px 0 0;
+        color: #64748b !important;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 1rem 1.5rem;
+        border: 1px solid #e2e8f0;
         border-bottom: none;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
     }
     
     .stTabs [aria-selected="true"] {
-        background: white;
-        color: var(--accent-blue);
-        border-color: var(--gray-200);
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        color: var(--primary-blue) !important;
+        border-color: var(--primary-blue);
+        border-left: 3px solid var(--primary-blue);
         position: relative;
         z-index: 1;
+        font-weight: 700;
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
     
     .stTabs [aria-selected="true"]:after {
@@ -304,20 +379,25 @@ st.markdown("""
         margin: 0;
     }
     
-    /* Section headers within tabs */
+    /* Section headers within tabs - Enhanced professional styling */
     .tab-section-header {
-        background: transparent;
-        padding: 0.75rem 0;
-        margin-bottom: 1.5rem;
-        border-bottom: 2px solid var(--gray-200);
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0 1rem 0;
+        border-left: 4px solid var(--primary-blue);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
     
     .tab-section-header h3 {
         margin: 0;
-        color: var(--gray-800);
-        font-size: 1.125rem;
-        font-weight: 600;
+        color: #1e293b;
+        font-size: 1.25rem;
+        font-weight: 700;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
     }
     
     /* Override Streamlit's default markdown styling in tabs */
@@ -377,10 +457,190 @@ st.markdown("""
         padding: 1rem;
         border-radius: 8px;
         margin: 0.5rem 0;
-        border-left: 3px solid var(--aramco-blue);
+        border-left: 3px solid var(--accent-blue);
+    }
+    
+    /* Comprehensive Light Mode Streamlit Component Overrides */
+    
+    /* Buttons */
+    .stButton > button {
+        background-color: var(--primary-blue) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+    }
+    
+    .stButton > button:hover {
+        background-color: var(--accent-blue) !important;
+        border: none !important;
+    }
+    
+    /* Selectboxes and other inputs */
+    .stSelectbox > div > div {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+        border-radius: 6px !important;
+    }
+    
+    .stSelectbox > div > div > div {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Date inputs */
+    .stDateInput > div > div > input {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Number inputs */
+    .stNumberInput > div > div > input {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Multiselect */
+    .stMultiSelect > div > div {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+    }
+    
+    /* Metrics */
+    .stMetric {
+        background-color: white !important;
+        padding: 1rem !important;
+        border-radius: 8px !important;
+        border: 1px solid var(--gray-200) !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    }
+    
+    .stMetric > div {
+        color: var(--text-primary) !important;
+    }
+    
+    .stMetric [data-testid="metric-container"] > div {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Progress bars */
+    .stProgress > div > div {
+        background-color: var(--gray-200) !important;
+    }
+    
+    .stProgress > div > div > div {
+        background-color: var(--primary-blue) !important;
+    }
+    
+    /* Columns */
+    .stColumn {
+        background-color: transparent !important;
+    }
+    
+    /* Expander */
+    .stExpander {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+        border-radius: 8px !important;
+    }
+    
+    .stExpander > div > div {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Code blocks */
+    .stCode {
+        background-color: var(--gray-100) !important;
+        border: 1px solid var(--gray-200) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Dataframe */
+    .stDataFrame {
+        background-color: white !important;
+    }
+    
+    /* Alert messages */
+    .stAlert {
+        background-color: white !important;
+        border-radius: 8px !important;
+        border: 1px solid var(--gray-200) !important;
+    }
+    
+    .stAlert > div {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Info messages */
+    .stInfo {
+        background-color: #e0f2fe !important;
+        border-left: 4px solid var(--primary-blue) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Success messages */
+    .stSuccess {
+        background-color: #e8f5e8 !important;
+        border-left: 4px solid var(--success-green) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Warning messages */
+    .stWarning {
+        background-color: #fff4e6 !important;
+        border-left: 4px solid var(--warning-amber) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Error messages */
+    .stError {
+        background-color: #fef2f2 !important;
+        border-left: 4px solid var(--error-red) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Text elements */
+    p, span, div, label {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Ensure plotly charts have white backgrounds */
+    .stPlotlyChart {
+        background-color: white !important;
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Light mode chart configuration
+def apply_light_mode_layout(fig):
+    """Apply consistent light mode styling to Plotly charts"""
+    fig.update_layout(
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color='#0f172a'),
+        title_font=dict(color='#0f172a'),
+        xaxis=dict(
+            gridcolor='#e2e8f0',
+            linecolor='#e2e8f0',
+            tickcolor='#64748b',
+            title_font=dict(color='#334155'),
+            tickfont=dict(color='#334155')
+        ),
+        yaxis=dict(
+            gridcolor='#e2e8f0',
+            linecolor='#e2e8f0',
+            tickcolor='#64748b',
+            title_font=dict(color='#334155'),
+            tickfont=dict(color='#334155')
+        ),
+        legend=dict(
+            bgcolor='rgba(255,255,255,0.9)',
+            bordercolor='#e2e8f0',
+            borderwidth=1,
+            font=dict(color='#334155')
+        )
+    )
+    return fig
 
 # Data loading functions
 @st.cache_data(ttl=300)
@@ -611,7 +871,7 @@ def create_production_forecast_chart(production_df, forecast_data=None):
         hovermode='x unified',
         height=500,
         font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#1f2937'),
+        title_font=dict(size=16, color='#0f172a'),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -638,7 +898,7 @@ def create_production_forecast_chart(production_df, forecast_data=None):
         spikemode="across"
     )
     
-    return fig
+    return apply_light_mode_layout(fig)
 
 def create_price_forecast_chart(price_df, price_forecast_data=None):
     """Create price forecasting chart"""
@@ -708,7 +968,7 @@ def create_price_forecast_chart(price_df, price_forecast_data=None):
         hovermode='x unified',
         height=500,
         font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#1f2937'),
+        title_font=dict(size=16, color='#0f172a'),
         # Enable zoom and pan
         dragmode='zoom',
         selectdirection='d'
@@ -728,7 +988,7 @@ def create_price_forecast_chart(price_df, price_forecast_data=None):
         spikemode="across"
     )
     
-    return fig
+    return apply_light_mode_layout(fig)
 
 def create_demand_forecast_chart(demand_df, demand_forecast_data=None):
     """Create demand forecasting chart by region"""
@@ -754,7 +1014,7 @@ def create_demand_forecast_chart(demand_df, demand_forecast_data=None):
             y=regional_demand.columns[-1],  # Assume last column is demand
             color='region',
             title='Regional Demand Forecasting',
-            color_discrete_sequence=['#1f2937', '#059669', '#3b82f6', '#dc2626', '#7c3aed']
+            color_discrete_sequence=['#3b82f6', '#059669', '#0f172a', '#dc2626', '#7c3aed']
         )
     else:
         # Simple time series
@@ -766,7 +1026,7 @@ def create_demand_forecast_chart(demand_df, demand_forecast_data=None):
                 y=recent_demand[demand_col[0]],
                 mode='lines',
                 name='Historical Demand',
-                line=dict(color='#1f2937', width=2)
+                line=dict(color='#0f172a', width=2)
             ))
         else:
             return go.Figure()
@@ -790,7 +1050,7 @@ def create_demand_forecast_chart(demand_df, demand_forecast_data=None):
         yaxis_title='Demand (Thousand BPD)',
         height=500,
         font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#1f2937'),
+        title_font=dict(size=16, color='#0f172a'),
         hovermode='x unified',
         # Enable zoom and pan
         dragmode='zoom',
@@ -811,7 +1071,7 @@ def create_demand_forecast_chart(demand_df, demand_forecast_data=None):
         spikemode="across"
     )
     
-    return fig
+    return apply_light_mode_layout(fig)
 
 def create_maintenance_optimization_chart(maintenance_df):
     """Create maintenance scheduling optimization chart"""
@@ -927,7 +1187,7 @@ def create_maintenance_optimization_chart(maintenance_df):
         showlegend=False,
         title_text="Maintenance Scheduling Optimization",
         title_x=0.5,
-        title_font=dict(size=16, color='#1f2937'),
+        title_font=dict(size=16, color='#0f172a'),
         # Enable zoom and pan
         dragmode='zoom',
         selectdirection='d'
@@ -952,7 +1212,7 @@ def create_maintenance_optimization_chart(maintenance_df):
             col=(i-1)%2+1
         )
     
-    return fig
+    return apply_light_mode_layout(fig)
 
 def display_forecast_metrics(forecast_data_list):
     """Display forecasting KPI metrics"""
@@ -1007,16 +1267,41 @@ def display_forecast_metrics(forecast_data_list):
 def main():
     """Main forecasting dashboard application"""
     
-    # Header
+    # Professional Header
     st.markdown("""
-    <div class="mlops-header">
-        <h1>Oil & Gas Forecasting Platform</h1>
-        <div class="subtitle">Advanced ML-driven analytics for production, pricing, and demand optimization</div>
+    <div class="enterprise-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>⚡ Energy Analytics Platform</h1>
+                <div class="header-subtitle">Strategic Forecasting & Risk Management Dashboard</div>
+            </div>
+            <div class="header-right">
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Active Models</span>
+                        <span class="stat-value">4</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Coverage</span>
+                        <span class="stat-value">Global</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Updated</span>
+                        <span class="stat-value">Live</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar controls
-    st.sidebar.markdown("## Forecasting Controls")
+    # Enhanced Professional Sidebar
+    st.sidebar.markdown("""
+    <div style='background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: 1.5rem; margin: -1rem -1rem 1.5rem -1rem; border-radius: 0 0 12px 12px;'>
+        <h2 style='color: white; margin: 0; font-size: 1.5rem; font-weight: 700; text-align: center;'>⚙️ Controls</h2>
+        <p style='color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; text-align: center; font-size: 0.9rem;'>Strategic Parameters</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Load data
     with st.spinner("Loading time series data..."):
@@ -1049,7 +1334,7 @@ def main():
     selected_forecast_types = st.sidebar.multiselect(
         "Select Forecast Types",
         options=forecast_types,
-        default=['oil_production_bpd', 'crude_oil_price_usd_bbl'],
+        default=['oil_production_bpd', 'crude_oil_price_usd_bbl', 'gasoline_demand_thousand_bpd'],
         help="Choose which metrics to forecast"
     )
     

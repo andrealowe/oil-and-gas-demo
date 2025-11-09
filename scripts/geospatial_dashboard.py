@@ -94,11 +94,13 @@ st.markdown("""
         }
     }
     
-    /* Primary color scheme */
+    /* Light Mode color scheme */
     :root {
-        --aramco-blue: #00A3E0;
-        --aramco-green: #84BD00;
-        --aramco-dark-blue: #0033A0;
+        --aramco-blue: #3b82f6;
+        --aramco-green: #10b981;
+        --aramco-dark-blue: #2563eb;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
         --aramco-light-gray: #F5F5F5;
         --aramco-dark-gray: #333333;
     }
@@ -191,6 +193,35 @@ st.markdown("""
         color: var(--aramco-blue);
         font-size: 1.2rem;
         padding: 2rem;
+    }
+    
+    /* Comprehensive Light Mode Streamlit Component Overrides */
+    .stButton > button {
+        background-color: var(--aramco-blue) !important;
+        color: white !important;
+        border: none !important;
+    }
+    
+    .stSelectbox > div > div, .stTextInput > div > div > input, 
+    .stDateInput > div > div > input, .stNumberInput > div > div > input {
+        background-color: white !important;
+        border: 1px solid #e2e8f0 !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .stMetric {
+        background-color: white !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    }
+    
+    p, span, div, label {
+        color: var(--text-primary) !important;
+    }
+    
+    .stPlotlyChart {
+        background-color: white !important;
     }
 </style>
 """, unsafe_allow_html=True)
