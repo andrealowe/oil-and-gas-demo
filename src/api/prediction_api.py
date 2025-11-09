@@ -54,7 +54,8 @@ class ProductionForecastingAPI:
             logger.error(f"Error loading champion model: {e}")
             raise
     
-    def predict(self, input_data):
+    def predict_simple(self, input_data):
+        """Simple prediction method with mock data for Domino compatibility"""
         """
         Make production forecast prediction
         
@@ -172,17 +173,32 @@ class ProductionForecastingAPI:
 # Global API instance
 api = ProductionForecastingAPI()
 
-def predict_production(input_data):
+def predict_production(facility_id="all_facilities", forecast_days=7, start_date=None):
     """
-    Main prediction function for API endpoint
+    Main production prediction function for Domino Model API endpoint
     
     Args:
-        input_data (dict): Input parameters for prediction
+        facility_id (str): Facility ID or "all_facilities" for aggregate
+        forecast_days (int): Number of days to forecast (1-365)
+        start_date (str): Start date in YYYY-MM-DD format (optional, defaults to tomorrow)
     
     Returns:
-        dict: Prediction results
+        dict: Production prediction results
     """
-    return api.predict(input_data)
+    from datetime import datetime, timedelta
+    
+    # Set default start date to tomorrow if not provided
+    if start_date is None:
+        start_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    # Create input data structure for the API class
+    input_data = {
+        'facility_id': facility_id,
+        'forecast_days': forecast_days,
+        'start_date': start_date
+    }
+    
+    return api.predict_simple(input_data)
 
 # Example usage and testing
 if __name__ == "__main__":

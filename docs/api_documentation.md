@@ -1,14 +1,14 @@
 # Oil & Gas Forecasting API Documentation
 
-This document provides comprehensive documentation for the Oil & Gas Forecasting API endpoints deployed on Domino Data Lab. All endpoints follow the Domino Model API input format with the `"data": {"start": N, "stop": M}` pattern for specifying forecast ranges.
+This document provides comprehensive documentation for the simplified Oil & Gas Forecasting API endpoints deployed on Domino Data Lab. All endpoints accept individual parameters directly as specified in the Domino Model API documentation.
 
 ## API Endpoints Overview
 
-| Endpoint | Purpose | Primary Use Case |
-|----------|---------|------------------|
-| `/predict_production` | Production Forecasting | Forecast oil/gas production volumes |
-| `/predict_prices` | Price Forecasting | Forecast crude oil and natural gas prices |
-| `/predict_demand` | Demand Forecasting | Forecast regional energy demand |
+| Endpoint | Purpose | Primary Use Case | API File |
+|----------|---------|------------------|----------|
+| `/predict_production` | Production Forecasting | Forecast oil/gas production volumes | `simple_prediction_api.py` |
+| `/predict_prices` | Price Forecasting | Forecast crude oil and natural gas prices | `simple_price_api.py` |
+| `/predict_demand` | Demand Forecasting | Forecast regional energy demand | `simple_demand_api.py` |
 
 ---
 
