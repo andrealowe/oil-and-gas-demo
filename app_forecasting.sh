@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Oil & Gas Forecasting Dashboard Launcher for Domino
-# This script launches the Streamlit forecasting dashboard
-
 mkdir -p ~/.streamlit
 
 cat << EOF > ~/.streamlit/config.toml
@@ -16,4 +13,4 @@ enableXsrfProtection = false
 address = "0.0.0.0"
 EOF
 
-streamlit run scripts/forecasting_dashboard.py
+streamlit runscripts/forecasting_dashboard.py

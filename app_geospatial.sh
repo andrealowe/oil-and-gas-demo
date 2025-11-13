@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Oil & Gas Geospatial Dashboard Launcher for Domino
-# This script launches the Streamlit geospatial dashboard
-
-#!/bin/bash
-
 mkdir -p ~/.streamlit
 
 cat << EOF > ~/.streamlit/config.toml
