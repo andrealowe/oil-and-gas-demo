@@ -31,7 +31,7 @@ def format_large_number(value):
 # Page configuration
 st.set_page_config(
     page_title="Oil & Gas Forecasting Dashboard",
-    page_icon="⚡",
+    page_icon="/mnt/code/docs/domino_logo.svg",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -107,23 +107,24 @@ st.markdown("""
         }
     }
     
-    /* Light Mode MLOps color scheme */
+    /* Professional Light Mode color scheme */
     :root {
-        --primary-blue: #3b82f6;        /* Bright blue instead of dark */
-        --secondary-blue: #60a5fa;      /* Light blue instead of dark */
-        --accent-blue: #2563eb;         /* Medium blue for accents */
-        --light-blue: #dbeafe;          /* Keep light blue */
-        --success-green: #10b981;       /* Bright green */
-        --warning-amber: #f59e0b;       /* Bright amber */
-        --error-red: #ef4444;           /* Bright red */
+        --primary-blue: #2563eb;        /* Professional blue */
+        --secondary-blue: #60a5fa;      /* Light blue */
+        --accent-blue: #1d4ed8;         /* Darker blue for accents */
+        --light-blue: #dbeafe;          /* Very light blue */
+        --success-green: #059669;       /* Professional green */
+        --warning-amber: #d97706;       /* Professional amber */
+        --error-red: #dc2626;           /* Professional red */
         --gray-50: #ffffff;             /* Pure white backgrounds */
         --gray-100: #f8fafc;           /* Very light gray */
-        --gray-200: #e2e8f0;           /* Light gray borders */
-        --gray-600: #64748b;           /* Medium gray text */
-        --gray-800: #334155;           /* Dark gray (for text) */
-        --gray-900: #0f172a;           /* Very dark (for text) */
-        --text-primary: #0f172a;        /* Primary text color */
-        --text-secondary: #475569;      /* Secondary text color */
+        --gray-200: #e5e7eb;           /* Light gray borders */
+        --gray-600: #6b7280;           /* Medium gray text - improved contrast */
+        --gray-700: #374151;           /* Better contrast for text */
+        --gray-800: #1f2937;           /* Dark gray (for text) */
+        --gray-900: #111827;           /* Very dark (for text) - improved contrast */
+        --text-primary: #111827;        /* Primary text color - better contrast */
+        --text-secondary: #374151;      /* Secondary text color - better contrast */
     }
     
     /* Main background - clean enterprise styling */
@@ -134,15 +135,15 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* Enterprise Header - Professional oil & gas company style */
+    /* Professional Enterprise Header */
     .enterprise-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
         color: white;
         padding: 2rem 2.5rem;
         border-radius: 12px;
         margin-bottom: 2rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 16px -4px rgba(37, 99, 235, 0.25), 0 2px 6px -1px rgba(0, 0, 0, 0.08);
         position: relative;
         overflow: hidden;
     }
@@ -259,6 +260,37 @@ st.markdown("""
         color: var(--gray-600);
         font-weight: 500;
         line-height: 1.4;
+    }
+    
+    /* Blue box text styling - make text white */
+    .enterprise-header .header-left h1,
+    .enterprise-header .header-subtitle,
+    .enterprise-header .stat-label,
+    .enterprise-header .stat-value {
+        color: white !important;
+    }
+    
+    .enterprise-header .stat-label {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    /* Sidebar blue header text styling - make text white for header only */
+    .stSidebar div[style*="background: linear-gradient"] h2,
+    .stSidebar div[style*="background: linear-gradient"] p {
+        color: white !important;
+    }
+    
+    /* Regular sidebar text should be dark for readability */
+    .stSidebar .stMarkdown p,
+    .stSidebar .stMarkdown h3,
+    .stSidebar .stSelectbox label,
+    .stSidebar .stSlider label,
+    .stSidebar .stMultiSelect label,
+    .stSidebar .stCheckbox label,
+    .stSidebar .stExpander label,
+    .stSidebar label,
+    .stSidebar .stMarkdown {
+        color: var(--text-primary) !important;
     }
     
     /* Status indicators - professional MLOps colors */
@@ -462,17 +494,60 @@ st.markdown("""
     
     /* Comprehensive Light Mode Streamlit Component Overrides */
     
-    /* Buttons */
+    /* Enhanced Buttons - More prominent styling with white text */
     .stButton > button {
-        background-color: var(--primary-blue) !important;
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%) !important;
         color: white !important;
         border: none !important;
-        border-radius: 6px !important;
+        border-radius: 8px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.025em !important;
+        box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.4) !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+        min-height: 48px !important;
     }
     
     .stButton > button:hover {
-        background-color: var(--accent-blue) !important;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, #1e40af 100%) !important;
         border: none !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.5) !important;
+    }
+    
+    .stButton > button:active {
+        color: white !important;
+        transform: translateY(0px) !important;
+        box-shadow: 0 2px 8px -2px rgba(37, 99, 235, 0.4) !important;
+    }
+    
+    /* Primary button variant for "Generate New Forecasts" - Blue theme */
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.5) !important;
+        font-weight: 700 !important;
+    }
+    
+    .stButton > button[kind="primary"]:hover {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, #1e40af 100%) !important;
+        color: white !important;
+        box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.6) !important;
+    }
+    
+    .stButton > button[kind="primary"]:active {
+        color: white !important;
+    }
+    
+    /* Additional specificity for button text */
+    .stButton button span,
+    .stButton button div,
+    .stButton button * {
+        color: white !important;
     }
     
     /* Selectboxes and other inputs */
@@ -617,27 +692,27 @@ def apply_light_mode_layout(fig):
     fig.update_layout(
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color='#0f172a'),
-        title_font=dict(color='#0f172a'),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color='#111827'),
+        title_font=dict(color='#111827', size=16),
         xaxis=dict(
-            gridcolor='#e2e8f0',
-            linecolor='#e2e8f0',
-            tickcolor='#64748b',
-            title_font=dict(color='#334155'),
-            tickfont=dict(color='#334155')
+            gridcolor='#e5e7eb',
+            linecolor='#e5e7eb',
+            tickcolor='#6b7280',
+            title_font=dict(color='#374151', size=14),
+            tickfont=dict(color='#374151', size=12)
         ),
         yaxis=dict(
-            gridcolor='#e2e8f0',
-            linecolor='#e2e8f0',
-            tickcolor='#64748b',
-            title_font=dict(color='#334155'),
-            tickfont=dict(color='#334155')
+            gridcolor='#e5e7eb',
+            linecolor='#e5e7eb',
+            tickcolor='#6b7280',
+            title_font=dict(color='#374151', size=14),
+            tickfont=dict(color='#374151', size=12)
         ),
         legend=dict(
-            bgcolor='rgba(255,255,255,0.9)',
-            bordercolor='#e2e8f0',
+            bgcolor='rgba(255,255,255,0.95)',
+            bordercolor='#e5e7eb',
             borderwidth=1,
-            font=dict(color='#334155')
+            font=dict(color='#374151', size=12)
         )
     )
     return fig
@@ -870,8 +945,8 @@ def create_production_forecast_chart(production_df, forecast_data=None):
         ),
         hovermode='x unified',
         height=500,
-        font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#0f172a'),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", size=12),
+        title_font=dict(size=16, color='#111827'),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -967,8 +1042,8 @@ def create_price_forecast_chart(price_df, price_forecast_data=None):
         yaxis_title='Price (USD)',
         hovermode='x unified',
         height=500,
-        font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#0f172a'),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", size=12),
+        title_font=dict(size=16, color='#111827'),
         # Enable zoom and pan
         dragmode='zoom',
         selectdirection='d'
@@ -1049,8 +1124,8 @@ def create_demand_forecast_chart(demand_df, demand_forecast_data=None):
         xaxis_title='Date',
         yaxis_title='Demand (Thousand BPD)',
         height=500,
-        font=dict(family="Arial", size=12),
-        title_font=dict(size=16, color='#0f172a'),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", size=12),
+        title_font=dict(size=16, color='#111827'),
         hovermode='x unified',
         # Enable zoom and pan
         dragmode='zoom',
@@ -1187,7 +1262,7 @@ def create_maintenance_optimization_chart(maintenance_df):
         showlegend=False,
         title_text="Maintenance Scheduling Optimization",
         title_x=0.5,
-        title_font=dict(size=16, color='#0f172a'),
+        title_font=dict(size=16, color='#111827'),
         # Enable zoom and pan
         dragmode='zoom',
         selectdirection='d'
@@ -1272,7 +1347,7 @@ def main():
     <div class="enterprise-header">
         <div class="header-content">
             <div class="header-left">
-                <h1>⚡ Energy Analytics Platform</h1>
+                <h1>Energy Analytics Platform</h1>
                 <div class="header-subtitle">Strategic Forecasting & Risk Management Dashboard</div>
             </div>
             <div class="header-right">
@@ -1295,13 +1370,21 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Enhanced Professional Sidebar
+    # Professional Sidebar
     st.sidebar.markdown("""
-    <div style='background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: 1.5rem; margin: -1rem -1rem 1.5rem -1rem; border-radius: 0 0 12px 12px;'>
-        <h2 style='color: white; margin: 0; font-size: 1.5rem; font-weight: 700; text-align: center;'>⚙️ Controls</h2>
-        <p style='color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; text-align: center; font-size: 0.9rem;'>Strategic Parameters</p>
+    <div style='background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); padding: 1.5rem; margin: -1rem -1rem 1.5rem -1rem; border-radius: 0 0 12px 12px;'>
+        <h2 style='color: white; margin: 0; font-size: 1.5rem; font-weight: 700; text-align: center;'>Control Panel</h2>
+        <p style='color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; text-align: center; font-size: 0.9rem;'>Forecast Management</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Forecast generation button at the top
+    st.sidebar.markdown("### Quick Actions")
+    
+    # Generate forecasts button
+    generate_forecasts = st.sidebar.button("Generate New Forecasts", type="primary")
+    
+    st.sidebar.markdown("---")  # Separator
     
     # Load data
     with st.spinner("Loading time series data..."):
@@ -1371,20 +1454,38 @@ def main():
     
     st.sidebar.markdown('</div>', unsafe_allow_html=True)
     
-    # Data refresh
-    if st.sidebar.button("Refresh Data & Forecasts"):
-        st.cache_data.clear()
-        st.rerun()
-    
-    # Generate forecasts button
-    generate_forecasts = st.sidebar.button("Generate New Forecasts", type="primary")
+    # Initialize session state for forecasts
+    if 'default_forecasts_generated' not in st.session_state:
+        st.session_state.default_forecasts_generated = False
+        st.session_state.forecast_results = {}
     
     # Store forecast results
-    forecast_results = {}
+    forecast_results = st.session_state.forecast_results
     
+    # Generate default forecasts on first load
+    if not st.session_state.default_forecasts_generated:
+        with st.spinner("Loading default forecasts..."):
+            for forecast_type in selected_forecast_types:
+                forecast_params = {
+                    'forecast_type': forecast_type,
+                    'horizon_days': forecast_horizon,
+                    'confidence_level': confidence_level,
+                    'seasonality': seasonality_adjustment,
+                    'volatility_factor': market_volatility,
+                    'external_factors': external_factors
+                }
+                
+                forecast_result = call_forecasting_api(forecast_params)
+                forecast_results[forecast_type] = forecast_result
+            
+            st.session_state.forecast_results = forecast_results
+            st.session_state.default_forecasts_generated = True
+    
+    # Handle manual forecast generation
     if generate_forecasts:
         st.sidebar.success("Generating forecasts...")
         
+        forecast_results = {}
         for forecast_type in selected_forecast_types:
             forecast_params = {
                 'forecast_type': forecast_type,
@@ -1399,6 +1500,8 @@ def main():
                 forecast_result = call_forecasting_api(forecast_params)
                 forecast_results[forecast_type] = forecast_result
         
+        # Update session state with new forecasts
+        st.session_state.forecast_results = forecast_results
         st.sidebar.success("Forecasts generated!")
     
     # Display forecast metrics
@@ -1422,7 +1525,7 @@ def main():
         production_forecast = forecast_results.get('oil_production_bpd')
         production_chart = create_production_forecast_chart(production_df, production_forecast)
         
-        st.plotly_chart(production_chart, use_container_width=True, config={
+        st.plotly_chart(production_chart, width='stretch', config={
             'displayModeBar': True,
             'displaylogo': False,
             'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
@@ -1466,7 +1569,7 @@ def main():
                     'oil_production_bpd': 'sum',
                     'gas_production_mcfd': 'sum'
                 }).round(0)
-                st.dataframe(regional_production, use_container_width=True)
+                st.dataframe(regional_production, width='stretch')
     
     with tab2:
         st.markdown('<div class="tab-section-header"><h3>Oil & Gas Price Forecasting</h3></div>', unsafe_allow_html=True)
@@ -1475,7 +1578,7 @@ def main():
         price_forecast = forecast_results.get('crude_oil_price_usd_bbl')
         price_chart = create_price_forecast_chart(price_df, price_forecast)
         
-        st.plotly_chart(price_chart, use_container_width=True, config={
+        st.plotly_chart(price_chart, width='stretch', config={
             'displayModeBar': True,
             'displaylogo': False,
             'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
@@ -1556,7 +1659,7 @@ def main():
         demand_forecast = forecast_results.get('gasoline_demand_thousand_bpd')
         demand_chart = create_demand_forecast_chart(demand_df, demand_forecast)
         
-        st.plotly_chart(demand_chart, use_container_width=True, config={
+        st.plotly_chart(demand_chart, width='stretch', config={
             'displayModeBar': True,
             'displaylogo': False,
             'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
@@ -1597,7 +1700,7 @@ def main():
         # Maintenance optimization chart
         maintenance_chart = create_maintenance_optimization_chart(maintenance_df)
         
-        st.plotly_chart(maintenance_chart, use_container_width=True, config={
+        st.plotly_chart(maintenance_chart, width='stretch', config={
             'displayModeBar': True,
             'displaylogo': False,
             'modeBarButtonsToAdd': ['drawrect', 'eraseshape'],
@@ -1613,7 +1716,7 @@ def main():
         with alert_col1:
             st.markdown("""
             <div class="maintenance-alert">
-                <strong>⚠️ Upcoming Maintenance</strong><br>
+                <strong>ALERT: Upcoming Maintenance</strong><br>
                 • Facility ABC-001: Scheduled in 5 days<br>
                 • Facility XYZ-045: Overdue by 2 days<br>
                 • Facility DEF-123: Preventive maintenance due
@@ -1623,7 +1726,7 @@ def main():
         with alert_col2:
             st.markdown("""
             <div class="maintenance-alert">
-                <strong>💡 Optimization Opportunities</strong><br>
+                <strong>INSIGHT: Optimization Opportunities</strong><br>
                 • Consolidate maintenance for Region A<br>
                 • Predictive maintenance for high-value assets<br>
                 • Cost savings: $2.3M annually
@@ -1646,7 +1749,7 @@ def main():
             }
             
             schedule_df = pd.DataFrame(schedule_data)
-            st.dataframe(schedule_df, use_container_width=True)
+            st.dataframe(schedule_df, width='stretch')
     
     with tab5:
         st.markdown('<div class="tab-section-header"><h3>Interactive Forecast Controls</h3></div>', unsafe_allow_html=True)
@@ -1768,7 +1871,7 @@ def main():
             
             if summary_data:
                 summary_df = pd.DataFrame(summary_data)
-                st.dataframe(summary_df, use_container_width=True)
+                st.dataframe(summary_df, width='stretch')
             
             # Export forecast results
             if st.button("Export Forecast Results"):
@@ -1797,7 +1900,22 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.9rem; padding: 1rem;'>
-        Oil & Gas Forecasting Dashboard | Last Updated: {} | Powered by Advanced ML Models
+        Oil & Gas Forecasting Dashboard | Last Updated: {}
+    </div>
+    <div style='text-align: center; padding: 0.5rem; margin-top: 1rem; border-top: 1px solid #e5e7eb;'>
+        <div style='display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: #6b7280; font-size: 0.8rem;'>
+            <svg width="16" height="16" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.7;">
+                <path d="M280.19 142.036C282.913 150.121 288.605 156.721 296.196 160.516C300.733 162.743 305.6 163.898 310.468 163.898C313.851 163.898 317.315 163.321 320.616 162.248L470.852 112.17C487.599 106.642 496.592 88.4924 491.064 71.7447C485.536 54.997 467.303 46.0044 450.636 51.532L300.403 101.61C283.738 107.137 274.663 125.288 280.19 142.036Z" fill="#6b7280"/>
+                <path d="M318.056 481.439C321.851 473.769 322.511 465.186 319.788 457.017C314.261 440.354 296.111 431.278 279.363 436.806L129.129 486.883C121.043 489.608 114.443 495.299 110.648 502.89C106.853 510.481 106.193 519.144 108.916 527.308C113.371 540.674 125.828 549.173 139.194 549.173C142.576 549.173 145.959 548.68 149.259 547.525L299.493 497.446C307.578 494.721 314.178 489.03 317.973 481.439H318.056Z" fill="#6b7280"/>
+                <path d="M174.588 202.183C179.125 204.493 183.992 205.565 188.778 205.565C200.493 205.565 211.795 199.13 217.405 187.91L288.191 46.2558C291.986 38.6657 292.646 30.0031 289.924 21.8355C287.201 13.7504 281.509 7.15028 273.918 3.35523C258.161 -4.48236 238.938 1.87022 231.101 17.6279L160.315 159.282C152.477 175.04 158.83 194.263 174.588 202.1V202.183Z" fill="#6b7280"/>
+                <path d="M425.308 396.871C417.718 393.076 408.973 392.416 400.888 395.139C392.803 397.861 386.203 403.554 382.408 411.144L311.622 552.797C307.826 560.388 307.166 569.05 309.889 577.219C312.612 585.388 318.304 591.903 325.894 595.699C330.432 597.925 335.217 599.08 340.167 599.08C343.549 599.08 347.015 598.502 350.314 597.431C358.4 594.707 365 589.016 368.795 581.424L439.581 439.772C443.375 432.182 444.036 423.519 441.313 415.351C438.59 407.266 432.898 400.666 425.308 396.871Z" fill="#6b7280"/>
+                <path d="M102.067 299.128C106.522 312.493 118.98 320.991 132.428 320.991C135.728 320.991 139.193 320.496 142.493 319.341C159.158 313.813 168.233 295.663 162.706 278.915L112.628 128.681C107.1 112.016 88.9499 102.858 72.2022 108.468C55.5369 113.996 46.4619 132.146 51.9896 148.894L102.067 299.128Z" fill="#6b7280"/>
+                <path d="M497.827 299.945C492.299 283.197 474.145 274.205 457.398 279.732C449.313 282.455 442.714 288.147 438.919 295.738C435.124 303.328 434.464 311.99 437.186 320.158L487.264 470.392C491.721 483.758 504.179 492.257 517.541 492.257C520.926 492.257 524.308 491.759 527.609 490.604C544.273 485.076 553.35 466.927 547.822 450.179L497.743 299.945H497.827Z" fill="#6b7280"/>
+                <path d="M174.01 442.593C177.392 442.593 180.857 442.015 184.157 440.94C192.242 438.219 198.843 432.527 202.637 424.936C206.432 417.347 207.092 408.684 204.37 400.516C201.648 392.431 195.955 385.831 188.365 382.036L46.7104 311.25C30.9528 303.413 11.7301 309.765 3.8925 325.523C0.0974548 333.195 -0.562554 341.775 2.15998 349.943C4.88251 358.028 10.5751 364.628 18.1652 368.423L159.82 439.209C164.357 441.438 169.225 442.593 174.092 442.593H174.01Z" fill="#6b7280"/>
+                <path d="M597.816 249.22C595.096 241.136 589.405 234.535 581.814 230.74L440.159 159.954C424.401 152.117 405.178 158.47 397.341 174.227C393.546 181.9 392.886 190.48 395.608 198.648C398.331 206.732 404.023 213.333 411.614 217.128L553.266 287.914C557.806 290.224 562.673 291.296 567.456 291.296C579.174 291.296 590.477 284.861 596.084 273.641C599.88 266.051 600.541 257.388 597.816 249.22Z" fill="#6b7280"/>
+            </svg>
+            <span>Powered by Domino Apps</span>
+        </div>
     </div>
     """.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")), unsafe_allow_html=True)
 

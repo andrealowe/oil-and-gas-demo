@@ -31,7 +31,7 @@ def format_large_number(value):
 # Page configuration
 st.set_page_config(
     page_title="Oil & Gas Geospatial Operations Dashboard",
-    page_icon="⚡",
+    page_icon="/mnt/code/docs/domino_logo.svg",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -94,15 +94,24 @@ st.markdown("""
         }
     }
     
-    /* Light Mode color scheme */
+    /* Professional Light Mode color scheme */
     :root {
-        --aramco-blue: #3b82f6;
-        --aramco-green: #10b981;
-        --aramco-dark-blue: #2563eb;
-        --text-primary: #0f172a;
-        --text-secondary: #475569;
-        --aramco-light-gray: #F5F5F5;
-        --aramco-dark-gray: #333333;
+        --primary-blue: #2563eb;        /* Professional blue */
+        --secondary-blue: #60a5fa;      /* Light blue */
+        --accent-blue: #1d4ed8;         /* Darker blue for accents */
+        --light-blue: #dbeafe;          /* Very light blue */
+        --success-green: #059669;       /* Professional green */
+        --warning-amber: #d97706;       /* Professional amber */
+        --error-red: #dc2626;           /* Professional red */
+        --gray-50: #ffffff;             /* Pure white backgrounds */
+        --gray-100: #f8fafc;           /* Very light gray */
+        --gray-200: #e5e7eb;           /* Light gray borders */
+        --gray-600: #6b7280;           /* Medium gray text - improved contrast */
+        --gray-700: #374151;           /* Better contrast for text */
+        --gray-800: #1f2937;           /* Dark gray (for text) */
+        --gray-900: #111827;           /* Very dark (for text) - improved contrast */
+        --text-primary: #111827;        /* Primary text color - better contrast */
+        --text-secondary: #374151;      /* Secondary text color - better contrast */
     }
     
     /* Main background and container styling */
@@ -112,58 +121,115 @@ st.markdown("""
         min-height: 100vh;
     }
     
-    /* Header styling */
-    .aramco-header {
-        background: linear-gradient(135deg, var(--aramco-blue), var(--aramco-dark-blue));
+    /* Professional Enterprise Header */
+    .enterprise-header {
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
         color: white;
-        padding: 2rem;
-        border-radius: 10px;
+        padding: 2rem 2.5rem;
+        border-radius: 12px;
         margin-bottom: 2rem;
-        text-align: center;
-        font-family: 'Arial', sans-serif;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 16px -4px rgba(37, 99, 235, 0.25), 0 2px 6px -1px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* Metric card styling */
-    .metric-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid var(--aramco-blue);
-        margin-bottom: 1rem;
-        font-family: 'Helvetica', sans-serif;
-        min-height: 120px;
+    .enterprise-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .header-left h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header-subtitle {
+        margin: 0.5rem 0 0 0;
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+        letter-spacing: 0.025em;
+    }
+    
+    /* Blue box text styling - make text white */
+    .enterprise-header .header-left h1,
+    .enterprise-header .header-subtitle {
+        color: white !important;
+    }
+    
+    /* Professional forecast card styling */
+    .metric-card, .forecast-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        padding: 2rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e5e7eb;
+        border-left: 4px solid var(--primary-blue);
+        margin-bottom: 1.5rem;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 140px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        transition: all 0.3s ease;
     }
     
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: var(--aramco-dark-blue);
-        word-break: break-all;
+    .metric-card:hover, .forecast-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.08);
+        border-left-color: #1d4ed8;
+    }
+    
+    .metric-value, .forecast-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        word-break: break-word;
         line-height: 1.2;
-        margin: 0.5rem 0;
+        margin: 0.75rem 0;
     }
     
-    .metric-label {
-        font-size: 1rem;
-        color: var(--aramco-dark-gray);
-        margin-bottom: 0.5rem;
+    .metric-label, .forecast-label {
+        font-size: 0.95rem;
+        color: var(--gray-600);
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.3;
+    }
+    
+    .metric-delta, .forecast-change {
+        font-size: 0.85rem;
+        margin-top: 0.75rem;
+        color: var(--gray-600);
         font-weight: 500;
+        line-height: 1.4;
     }
     
-    .metric-delta {
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
-    
-    /* Status indicators */
-    .status-excellent { color: var(--aramco-green); }
-    .status-good { color: #FFA500; }
-    .status-warning { color: #FF6B6B; }
-    .status-critical { color: #DC143C; }
+    /* Status indicators - professional MLOps colors */
+    .status-excellent, .forecast-up { color: var(--success-green); }
+    .status-good, .forecast-neutral { color: var(--warning-amber); }
+    .status-warning, .forecast-down { color: var(--error-red); }
+    .status-critical { color: var(--error-red); }
     
     /* Sidebar styling */
     .css-1d391kg {
@@ -195,25 +261,125 @@ st.markdown("""
         padding: 2rem;
     }
     
-    /* Comprehensive Light Mode Streamlit Component Overrides */
+    /* Enhanced Buttons - More prominent styling with white text */
     .stButton > button {
-        background-color: var(--aramco-blue) !important;
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%) !important;
         color: white !important;
         border: none !important;
+        border-radius: 8px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.025em !important;
+        box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.4) !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+        min-height: 48px !important;
     }
     
-    .stSelectbox > div > div, .stTextInput > div > div > input, 
-    .stDateInput > div > div > input, .stNumberInput > div > div > input {
+    .stButton > button:hover {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, #1e40af 100%) !important;
+        border: none !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.5) !important;
+    }
+    
+    .stButton > button:active {
+        color: white !important;
+        transform: translateY(0px) !important;
+        box-shadow: 0 2px 8px -2px rgba(37, 99, 235, 0.4) !important;
+    }
+    
+    /* Primary button variant */
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.5) !important;
+        font-weight: 700 !important;
+    }
+    
+    .stButton > button[kind="primary"]:hover {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, #1e40af 100%) !important;
+        color: white !important;
+        box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.6) !important;
+    }
+    
+    .stButton > button[kind="primary"]:active {
+        color: white !important;
+    }
+    
+    /* Additional specificity for button text */
+    .stButton button span,
+    .stButton button div,
+    .stButton button * {
+        color: white !important;
+    }
+    
+    /* Selectboxes and other inputs */
+    .stSelectbox > div > div {
         background-color: white !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid var(--gray-200) !important;
+        border-radius: 6px !important;
+    }
+    
+    .stSelectbox > div > div > div {
         color: var(--text-primary) !important;
     }
     
+    /* Date inputs */
+    .stDateInput > div > div > input {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Number inputs */
+    .stNumberInput > div > div > input {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Multiselect */
+    .stMultiSelect > div > div {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+    }
+    
+    /* Multiselect selected items - make text readable */
+    .stMultiSelect div[data-baseweb="tag"] {
+        background-color: var(--primary-blue) !important;
+        color: white !important;
+    }
+    
+    .stMultiSelect div[data-baseweb="tag"] span {
+        color: white !important;
+    }
+    
+    /* Text inputs */
+    .stTextInput > div > div > input {
+        background-color: white !important;
+        border: 1px solid var(--gray-200) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Metrics */
     .stMetric {
         background-color: white !important;
-        border: 1px solid #e2e8f0 !important;
+        padding: 1rem !important;
         border-radius: 8px !important;
+        border: 1px solid var(--gray-200) !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    }
+    
+    .stMetric > div {
+        color: var(--text-primary) !important;
+    }
+    
+    .stMetric [data-testid="metric-container"] > div {
+        color: var(--text-primary) !important;
     }
     
     p, span, div, label {
@@ -437,9 +603,9 @@ def create_facility_map(df):
     
     fig.update_layout(
         mapbox_style="open-street-map",
-        font=dict(family="Arial", size=12),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", size=12),
         title=dict(
-            font=dict(size=16, color='#0033A0'),
+            font=dict(size=16, color='#111827'),
             x=0.5
         ),
         coloraxis_colorbar=dict(
@@ -557,7 +723,7 @@ def create_production_efficiency_chart(df):
         showlegend=False,
         title_text="Production Efficiency and Environmental Analysis",
         title_x=0.5,
-        title=dict(font=dict(size=16, color='#0033A0'), x=0.5)
+        title=dict(font=dict(size=16, color='#111827'), x=0.5)
     )
     
     return fig
@@ -666,7 +832,7 @@ def create_equipment_health_dashboard(df):
         showlegend=False,
         title_text="Equipment Health Monitoring Dashboard",
         title_x=0.5,
-        title=dict(font=dict(size=16, color='#0033A0'), x=0.5)
+        title=dict(font=dict(size=16, color='#111827'), x=0.5)
     )
     
     return fig
@@ -783,11 +949,15 @@ def display_kpi_metrics(df):
 def main():
     """Main dashboard application"""
     
-    # Header
+    # Professional Header
     st.markdown("""
-    <div class="aramco-header">
-        <h1>Oil & Gas Geospatial Operations Dashboard</h1>
-        <p>Real-time facility monitoring, equipment health, and production optimization</p>
+    <div class="enterprise-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>Geospatial Operations Dashboard</h1>
+                <div class="header-subtitle">Real-time facility monitoring, equipment health, and production optimization</div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -831,7 +1001,7 @@ def main():
     # Data refresh
     if st.sidebar.button("Refresh Data"):
         st.cache_data.clear()
-        st.experimental_rerun()
+        st.rerun()
     
     # Filter data
     filtered_df = facilities_df[
@@ -859,7 +1029,7 @@ def main():
     with tab1:
         st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         facility_map = create_facility_map(filtered_df)
-        st.plotly_chart(facility_map, use_container_width=True)
+        st.plotly_chart(facility_map, width='stretch')
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Regional summary
@@ -872,18 +1042,18 @@ def main():
             'utilization_rate': 'mean'
         }).round(2)
         regional_summary.columns = ['Facilities', 'Oil Production (BPD)', 'Gas Production (MCFD)', 'Avg Health Score', 'Avg Utilization']
-        st.dataframe(regional_summary, use_container_width=True)
+        st.dataframe(regional_summary, width='stretch')
     
     with tab2:
         st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         production_chart = create_production_efficiency_chart(filtered_df)
-        st.plotly_chart(production_chart, use_container_width=True)
+        st.plotly_chart(production_chart, width='stretch')
         st.markdown('</div>', unsafe_allow_html=True)
     
     with tab3:
         st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         equipment_dashboard = create_equipment_health_dashboard(filtered_df)
-        st.plotly_chart(equipment_dashboard, use_container_width=True)
+        st.plotly_chart(equipment_dashboard, width='stretch')
         st.markdown('</div>', unsafe_allow_html=True)
     
     with tab4:
@@ -962,7 +1132,7 @@ def main():
             key="prediction_selector"
         )
         
-        if st.button("🤖 Generate AI Predictions", type="primary"):
+        if st.button("Generate AI Predictions", type="primary"):
             if prediction_facility:
                 facility_data = filtered_df[filtered_df['facility_name'] == prediction_facility].iloc[0].to_dict()
                 
@@ -1038,7 +1208,22 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.9rem; padding: 1rem;'>
-        Oil & Gas Geospatial Dashboard | Last Updated: {} | Data Source: Domino Data Lab
+        Oil & Gas Geospatial Dashboard | Last Updated: {}
+    </div>
+    <div style='text-align: center; padding: 0.5rem; margin-top: 1rem; border-top: 1px solid #e5e7eb;'>
+        <div style='display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: #6b7280; font-size: 0.8rem;'>
+            <svg width="16" height="16" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.7;">
+                <path d="M280.19 142.036C282.913 150.121 288.605 156.721 296.196 160.516C300.733 162.743 305.6 163.898 310.468 163.898C313.851 163.898 317.315 163.321 320.616 162.248L470.852 112.17C487.599 106.642 496.592 88.4924 491.064 71.7447C485.536 54.997 467.303 46.0044 450.636 51.532L300.403 101.61C283.738 107.137 274.663 125.288 280.19 142.036Z" fill="#6b7280"/>
+                <path d="M318.056 481.439C321.851 473.769 322.511 465.186 319.788 457.017C314.261 440.354 296.111 431.278 279.363 436.806L129.129 486.883C121.043 489.608 114.443 495.299 110.648 502.89C106.853 510.481 106.193 519.144 108.916 527.308C113.371 540.674 125.828 549.173 139.194 549.173C142.576 549.173 145.959 548.68 149.259 547.525L299.493 497.446C307.578 494.721 314.178 489.03 317.973 481.439H318.056Z" fill="#6b7280"/>
+                <path d="M174.588 202.183C179.125 204.493 183.992 205.565 188.778 205.565C200.493 205.565 211.795 199.13 217.405 187.91L288.191 46.2558C291.986 38.6657 292.646 30.0031 289.924 21.8355C287.201 13.7504 281.509 7.15028 273.918 3.35523C258.161 -4.48236 238.938 1.87022 231.101 17.6279L160.315 159.282C152.477 175.04 158.83 194.263 174.588 202.1V202.183Z" fill="#6b7280"/>
+                <path d="M425.308 396.871C417.718 393.076 408.973 392.416 400.888 395.139C392.803 397.861 386.203 403.554 382.408 411.144L311.622 552.797C307.826 560.388 307.166 569.05 309.889 577.219C312.612 585.388 318.304 591.903 325.894 595.699C330.432 597.925 335.217 599.08 340.167 599.08C343.549 599.08 347.015 598.502 350.314 597.431C358.4 594.707 365 589.016 368.795 581.424L439.581 439.772C443.375 432.182 444.036 423.519 441.313 415.351C438.59 407.266 432.898 400.666 425.308 396.871Z" fill="#6b7280"/>
+                <path d="M102.067 299.128C106.522 312.493 118.98 320.991 132.428 320.991C135.728 320.991 139.193 320.496 142.493 319.341C159.158 313.813 168.233 295.663 162.706 278.915L112.628 128.681C107.1 112.016 88.9499 102.858 72.2022 108.468C55.5369 113.996 46.4619 132.146 51.9896 148.894L102.067 299.128Z" fill="#6b7280"/>
+                <path d="M497.827 299.945C492.299 283.197 474.145 274.205 457.398 279.732C449.313 282.455 442.714 288.147 438.919 295.738C435.124 303.328 434.464 311.99 437.186 320.158L487.264 470.392C491.721 483.758 504.179 492.257 517.541 492.257C520.926 492.257 524.308 491.759 527.609 490.604C544.273 485.076 553.35 466.927 547.822 450.179L497.743 299.945H497.827Z" fill="#6b7280"/>
+                <path d="M174.01 442.593C177.392 442.593 180.857 442.015 184.157 440.94C192.242 438.219 198.843 432.527 202.637 424.936C206.432 417.347 207.092 408.684 204.37 400.516C201.648 392.431 195.955 385.831 188.365 382.036L46.7104 311.25C30.9528 303.413 11.7301 309.765 3.8925 325.523C0.0974548 333.195 -0.562554 341.775 2.15998 349.943C4.88251 358.028 10.5751 364.628 18.1652 368.423L159.82 439.209C164.357 441.438 169.225 442.593 174.092 442.593H174.01Z" fill="#6b7280"/>
+                <path d="M597.816 249.22C595.096 241.136 589.405 234.535 581.814 230.74L440.159 159.954C424.401 152.117 405.178 158.47 397.341 174.227C393.546 181.9 392.886 190.48 395.608 198.648C398.331 206.732 404.023 213.333 411.614 217.128L553.266 287.914C557.806 290.224 562.673 291.296 567.456 291.296C579.174 291.296 590.477 284.861 596.084 273.641C599.88 266.051 600.541 257.388 597.816 249.22Z" fill="#6b7280"/>
+            </svg>
+            <span>Powered by Domino Apps</span>
+        </div>
     </div>
     """.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")), unsafe_allow_html=True)
 
