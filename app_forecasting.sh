@@ -13,4 +13,4 @@ enableXsrfProtection = false
 address = "0.0.0.0"
 EOF
 
-streamlit runscripts/forecasting_dashboard.py
+streamlit run scripts/forecasting_dashboard.py
