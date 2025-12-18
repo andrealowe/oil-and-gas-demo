@@ -720,12 +720,26 @@ def apply_light_mode_layout(fig):
 # Data loading functions
 @st.cache_data(ttl=300)
 def load_production_timeseries():
-    """Load production time series data with caching"""
+    """Load production time series data with caching - prioritizes real data"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['base_data_path'] / 'production_timeseries.parquet'
-        df = pd.read_parquet(data_path)
+        
+        # Try to load real data first
+        real_data_path = paths['base_data_path'] / 'production_timeseries_real_based.parquet'
+        if real_data_path.exists():
+            df = pd.read_parquet(real_data_path)
+            df['date'] = pd.to_datetime(df['date'])
+            # Add data source indicator
+            df['data_source'] = 'Real (US Production Trends)'
+            st.sidebar.success("✅ Using Real Production Data")
+            return df
+        
+        # Fallback to synthetic data
+        synthetic_data_path = paths['base_data_path'] / 'production_timeseries.parquet'
+        df = pd.read_parquet(synthetic_data_path)
         df['date'] = pd.to_datetime(df['date'])
+        df['data_source'] = 'Synthetic'
+        st.sidebar.info("📊 Using Synthetic Production Data")
         return df
     except Exception as e:
         st.error(f"Error loading production data: {e}")
@@ -733,13 +747,33 @@ def load_production_timeseries():
 
 @st.cache_data(ttl=300)
 def load_price_data():
-    """Load price time series data with caching"""
+    """Load price time series data with caching - prioritizes real data"""
     try:
         paths = get_data_paths('Oil-and-Gas-Demo')
-        data_path = paths['base_data_path'] / 'prices_timeseries.parquet'
-        df = pd.read_parquet(data_path)
+        
+        # Try to load real FRED price data first
+        real_price_path = paths['base_data_path'] / 'price_data.csv'
+        if real_price_path.exists():
+            df = pd.read_csv(real_price_path)
+            df['date'] = pd.to_datetime(df['date'])
+            # Rename columns to match app expectations
+            column_mapping = {
+                'brent_crude_price': 'crude_oil_price',
+                'wti_crude_price': 'wti_crude_price', 
+                'natural_gas_price': 'natural_gas_price'
+            }
+            df = df.rename(columns=column_mapping)
+            df['data_source'] = 'Real (FRED)'
+            st.sidebar.success("✅ Using Real Price Data (FRED)")
+            return df
+        
+        # Fallback to synthetic data
+        synthetic_path = paths['base_data_path'] / 'prices_timeseries.parquet'
+        df = pd.read_parquet(synthetic_path)
         if 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date'])
+        df['data_source'] = 'Synthetic'
+        st.sidebar.info("📊 Using Synthetic Price Data")
         return df
     except Exception as e:
         st.warning(f"Error loading price data: {e}")
@@ -1392,6 +1426,33 @@ def main():
         price_df = load_price_data()
         demand_df = load_demand_data()
         maintenance_df = load_maintenance_data()
+    
+    # Data Quality Banner - show data sources being used
+    if not production_df.empty or not price_df.empty:
+        data_sources = []
+        if not production_df.empty and 'data_source' in production_df.columns:
+            prod_source = production_df['data_source'].iloc[0]
+            if 'Real' in prod_source:
+                data_sources.append("✅ Production: Real US Trends")
+            else:
+                data_sources.append("📊 Production: Synthetic")
+        
+        if not price_df.empty and 'data_source' in price_df.columns:
+            price_source = price_df['data_source'].iloc[0]
+            if 'Real' in price_source:
+                data_sources.append("✅ Prices: Real Market Data")
+            else:
+                data_sources.append("📊 Prices: Synthetic")
+        
+        if data_sources:
+            data_source_text = " | ".join(data_sources)
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%); 
+                        padding: 12px 20px; margin: 15px 0; border-radius: 10px; 
+                        border-left: 5px solid #10b981; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <strong>📈 Data Sources:</strong> {data_source_text}
+            </div>
+            """, unsafe_allow_html=True)
     
     # Forecast parameters
     st.sidebar.markdown("### Forecast Parameters")
