@@ -729,6 +729,11 @@ def load_production_timeseries():
         if real_data_path.exists():
             df = pd.read_parquet(real_data_path)
             df['date'] = pd.to_datetime(df['date'])
+            
+            # Standardize column names - real data has 'gas_production_mcf', dashboard expects 'gas_production_mcfd'
+            if 'gas_production_mcf' in df.columns and 'gas_production_mcfd' not in df.columns:
+                df['gas_production_mcfd'] = df['gas_production_mcf']
+            
             # Add data source indicator
             df['data_source'] = 'Real (US Production Trends)'
             st.sidebar.success("✅ Using Real Production Data")
@@ -772,6 +777,12 @@ def load_price_data():
         df = pd.read_parquet(synthetic_path)
         if 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date'])
+        
+        # Standardize column names - convert MCF to MMBTU for natural gas prices
+        # 1 MMBTU = ~1,000 MCF (thousand cubic feet)
+        if 'natural_gas_price_usd_mcf' in df.columns and 'natural_gas_price_usd_mmbtu' not in df.columns:
+            df['natural_gas_price_usd_mmbtu'] = df['natural_gas_price_usd_mcf']
+        
         df['data_source'] = 'Synthetic'
         st.sidebar.info("📊 Using Synthetic Price Data")
         return df
